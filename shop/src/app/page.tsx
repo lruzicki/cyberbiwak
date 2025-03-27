@@ -46,9 +46,9 @@ export default function Shop() {
   }>>("purchase-history", [])
 
   // Timer state
-  const [timerActive, setTimerActive] = useState(false)
-  const [timeRemaining, setTimeRemaining] = useState(70 * 60) // 70 minutes in seconds
-  const [currentRound, setCurrentRound] = useState(1)
+  const [timerActive, setTimerActive] = useLocalStorage("shop-timer-active", false)
+  const [timeRemaining, setTimeRemaining] = useLocalStorage("shop-time-remaining", 70 * 60) // Default to 70 minutes
+  const [currentRound, setCurrentRound] = useLocalStorage("shop-current-round", 1)
   const [rounds, setRounds] = useState<Round[]>([])
 
   // Add a password state and modal state for reset protection
@@ -171,17 +171,19 @@ export default function Shop() {
 
   // Reset purchased quantities when starting a new game
   const startTimer = () => {
-    setTimerActive(true)
-    setTimeRemaining(70 * 60) // Reset to 70 minutes
-    setCurrentRound(1)
+    if (!timerActive) {
+      setTimerActive(true)
+      if (timeRemaining === 70 * 60) {
+        setTimeRemaining(70 * 60) // Reset to 70 minutes only if not already started
+        setCurrentRound(1)
+        setPurchaseHistory([])
+        setPurchasedInRound({})
+      }
 
-    // Reset purchase history and round purchases for the new game
-    setPurchaseHistory([])
-    setPurchasedInRound({})
-
-    toast.success("Game Started!", {
-      description: "The 70-minute countdown has begun. Good luck!",
-    })
+      toast.success("Game Started!", {
+        description: "The 70-minute countdown has begun. Good luck!",
+      })
+    }
   }
 
   // Update the resetTimer function to require a password
@@ -672,6 +674,38 @@ export default function Shop() {
 
     return totals
   }
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null
+  
+    if (timerActive && timeRemaining > 0) {
+      interval = setInterval(() => {
+        setTimeRemaining((prev) => {
+          const newTime = prev - 1
+  
+          // Check if we need to update the round
+          const newRound = calculateRound(newTime)
+          if (newRound !== currentRound) {
+            setCurrentRound(newRound)
+            toast.info(`Round ${newRound} Started!`, {
+              description: "Resource limits and prices have been updated.",
+            })
+          }
+  
+          return newTime
+        })
+      }, 1000)
+    } else if (timerActive && timeRemaining === 0) {
+      setTimerActive(false)
+      toast.error("Game Over!", {
+        description: "The 70-minute countdown has ended.",
+      })
+    }
+  
+    return () => {
+      if (interval) clearInterval(interval)
+    }
+  }, [timerActive, timeRemaining, currentRound])
 
   // Get summary of purchased items
   const getPurchaseSummary = () => {
