@@ -12,7 +12,7 @@ import { MainNavBar } from "@/components/main-nav-bar"
 
 export default function Marketplace() {
   const [balance, setBalance] = useLocalStorage("shop-balance", 5000)
-  const [cartItems, setCartItems] = useLocalStorage("shop-cart", {})
+  const [cartItems, setCartItems] = useLocalStorage<Record<string, number>>("shop-cart", {})
   const [searchQuery, setSearchQuery] = useState("")
 
   // Marketplace listings

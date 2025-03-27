@@ -32,9 +32,18 @@ interface Round {
 export default function Shop() {
   const router = useRouter()
   const [balance, setBalance] = useLocalStorage("shop-balance", 5000)
-  const [inventory, setInventory] = useLocalStorage("shop-inventory", {})
-  const [cartItems, setCartItems] = useLocalStorage("shop-cart", {})
-  const [purchaseHistory, setPurchaseHistory] = useLocalStorage("purchase-history", [])
+  const [inventory, setInventory] = useLocalStorage<Record<string, number>>("shop-inventory", {})
+  const [cartItems, setCartItems] = useLocalStorage<Record<string, number>>("shop-cart", {})
+  const [purchaseHistory, setPurchaseHistory] = useLocalStorage<Array<{
+    id: number
+    itemId: string
+    itemName: string
+    price: number
+    quantity: number
+    date: string
+    category: string
+    round: number
+  }>>("purchase-history", [])
 
   // Timer state
   const [timerActive, setTimerActive] = useState(false)
@@ -158,7 +167,7 @@ export default function Shop() {
   const allItems = Object.values(categories).flat()
 
   // Track purchased quantities per round
-  const [purchasedInRound, setPurchasedInRound] = useLocalStorage("purchased-in-round", {})
+  const [purchasedInRound, setPurchasedInRound] = useLocalStorage<Record<number, Record<string, number>>>("purchased-in-round", {})
 
   // Reset purchased quantities when starting a new game
   const startTimer = () => {
@@ -655,7 +664,9 @@ export default function Shop() {
 
     purchaseHistory.forEach((purchase) => {
       if (purchase.category) {
-        totals[purchase.category] += purchase.price
+        if (purchase.category in totals) {
+          totals[purchase.category as keyof typeof totals] += purchase.price
+        }
       }
     })
 
@@ -664,7 +675,7 @@ export default function Shop() {
 
   // Get summary of purchased items
   const getPurchaseSummary = () => {
-    const summary = {}
+    const summary: Record<string, { name: string; quantity: number; totalSpent: number; category: string }> = {}
 
     purchaseHistory.forEach((purchase) => {
       if (!summary[purchase.itemId]) {
@@ -686,7 +697,7 @@ export default function Shop() {
   // Get the current price for an item based on the round
   const getCurrentPrice = (itemId: string) => {
     const currentRoundData = rounds.find((r) => r.number === currentRound)
-    if (!currentRoundData) return allItems.find((item) => item.id === itemId)?.price || 0
+    if (!currentRoundData) return 0
 
     return currentRoundData.prices[itemId] || 0
   }

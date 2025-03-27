@@ -13,7 +13,7 @@ import { MainNavBar } from "@/components/main-nav-bar"
 
 export default function Makro() {
   const [balance, setBalance] = useLocalStorage("shop-balance", 5000)
-  const [cartItems, setCartItems] = useLocalStorage("shop-cart", {})
+  const [cartItems, setCartItems] = useLocalStorage<Record<string, number>>("shop-cart", {})
   const [searchQuery, setSearchQuery] = useState("")
 
   // Catalogs/Flyers

@@ -13,7 +13,7 @@ import { MainNavBar } from "@/components/main-nav-bar"
 
 export default function Allegro() {
   const [balance, setBalance] = useLocalStorage("shop-balance", 5000)
-  const [cartItems, setCartItems] = useLocalStorage("shop-cart", {})
+  const [cartItems, setCartItems] = useLocalStorage<Record<string, number>>("shop-cart", {})
   const [searchQuery, setSearchQuery] = useState("")
 
   // Categories
@@ -146,7 +146,7 @@ export default function Allegro() {
     <div className="min-h-screen bg-gray-100">
       <MainNavBar
         balance={balance}
-        cartItemsCount={Object.values(cartItems).reduce((a: number, b: number) => a + (b as number), 0)}
+        cartItemsCount={Object.values(cartItems as Record<string, number>).reduce((a, b) => a + b, 0)}
       />
 
       {/* Custom Allegro Navbar */}
