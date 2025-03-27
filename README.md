@@ -5,7 +5,12 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 First, run the development server:
 
 ```bash
+cd shop-interface
+
+npm install
+
 npm run dev
+
 # or
 yarn dev
 # or
