@@ -13,22 +13,10 @@ import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
 import { Progress } from "@/components/ui/progress"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { categories } from "@/products/categories"
+import { roundData, Round } from "@/products/roundData"
 
-// Define the item type
-interface Item {
-  id: string
-  name: string
-  image: string
-  category: string
-}
-
-// Update the Round interface to include maxQuantity
-interface Round {
-  number: number
-  maxPurchases: Record<string, number>
-  prices: Record<string, number>
-}
-
+// Use the imported data
 export default function Shop() {
   const router = useRouter()
   const [balance, setBalance] = useLocalStorage("shop-balance", 5000)
@@ -55,113 +43,10 @@ export default function Shop() {
   const [resetPassword, setResetPassword] = useState("")
   const [showResetModal, setShowResetModal] = useState(false)
 
-  // Item categories with their products
-  const categories = {
-    wood: [
-      {
-        id: "sosna",
-        name: "Sosna",
-        image: "/placeholder.svg?height=100&width=100",
-        category: "wood",
-      },
-      {
-        id: "swierk",
-        name: "Świerk",
-        image: "/placeholder.svg?height=100&width=100",
-        category: "wood",
-      },
-      {
-        id: "buk",
-        name: "Buk",
-        image: "/placeholder.svg?height=100&width=100",
-        category: "wood",
-      },
-      {
-        id: "dab",
-        name: "Dąb",
-        image: "/placeholder.svg?height=100&width=100",
-        category: "wood",
-      },
-    ],
-    ground: [
-      {
-        id: "05ha",
-        name: "Działka 0,5 ha",
-        image: "/placeholder.svg?height=100&width=100",
-        category: "ground",
-      },
-      {
-        id: "07ha",
-        name: "Działka 0,7 ha",
-        image: "/placeholder.svg?height=100&width=100",
-        category: "ground",
-      },
-      {
-        id: "1ha",
-        name: "Działka 1 ha",
-        image: "/placeholder.svg?height=100&width=100",
-        category: "ground",
-      },
-      {
-        id: "14ha",
-        name: "Działka 1,4 ha",
-        image: "/placeholder.svg?height=100&width=100",
-        category: "ground",
-      },
-    ],
-    food: [
-      {
-        id: "woda",
-        name: "Woda",
-        image: "/placeholder.svg?height=100&width=100",
-        category: "food",
-      },
-      {
-        id: "chleb",
-        name: "Chleb",
-        image: "/placeholder.svg?height=100&width=100",
-        category: "food",
-      },
-      {
-        id: "truskawki",
-        name: "Truskawki",
-        image: "/placeholder.svg?height=100&width=100",
-        category: "food",
-      },
-      {
-        id: "jagody",
-        name: "Jagody",
-        image: "/placeholder.svg?height=100&width=100",
-        category: "food",
-      },
-      {
-        id: "wieprzowina",
-        name: "Wieprzowina",
-        image: "/placeholder.svg?height=100&width=100",
-        category: "food",
-      },
-      {
-        id: "ryby",
-        name: "Ryby",
-        image: "/placeholder.svg?height=100&width=100",
-        category: "food",
-      },
-      {
-        id: "kurczaki",
-        name: "Kurczaki",
-        image: "/placeholder.svg?height=100&width=100",
-        category: "food",
-      },
-    ],
-    tools: [
-      {
-        id: "narzedzia",
-        name: "Narzędzia",
-        image: "/placeholder.svg?height=100&width=100",
-        category: "tools",
-      },
-    ],
-  }
+  // Admin mode state
+  const [isAdminMode, setIsAdminMode] = useState(false)
+  const [adminPassword, setAdminPassword] = useState("")
+  const [showAdminModal, setShowAdminModal] = useState(false)
 
   // Flatten all items for easier access
   const allItems = Object.values(categories).flat()
@@ -208,283 +93,6 @@ export default function Shop() {
       })
     }
   }
-
-  // Add resource data for each round
-  const roundData: Round[] = [
-    {
-      number: 1,
-      maxPurchases: {
-        sosna: 15,
-        swierk: 15,
-        buk: 15,
-        dab: 15,
-        woda: 30,
-        chleb: 30,
-        truskawki: 7,
-        jagody: 7,
-        wieprzowina: 8,
-        ryby: 9,
-        kurczaki: 10,
-        "05ha": 1,
-        "07ha": 0,
-        "1ha": 0,
-        "14ha": 1,
-        narzedzia: 8,
-      },
-      prices: {
-        sosna: 25,
-        swierk: 28,
-        buk: 32,
-        dab: 36,
-        woda: 3,
-        chleb: 4,
-        truskawki: 8,
-        jagody: 9,
-        wieprzowina: 13,
-        ryby: 8,
-        kurczaki: 11,
-        "05ha": 500,
-        "07ha": 750,
-        "1ha": 1200,
-        "14ha": 1650,
-        narzedzia: 50,
-      },
-    },
-    {
-      number: 2,
-      maxPurchases: {
-        sosna: 15,
-        swierk: 15,
-        buk: 15,
-        dab: 15,
-        woda: 5,
-        chleb: 20,
-        truskawki: 4,
-        jagody: 4,
-        wieprzowina: 1,
-        ryby: 9,
-        kurczaki: 10,
-        "05ha": 0,
-        "07ha": 1,
-        "1ha": 0,
-        "14ha": 0,
-        narzedzia: 8,
-      },
-      prices: {
-        sosna: 25,
-        swierk: 28,
-        buk: 32,
-        dab: 36,
-        woda: 8,
-        chleb: 7,
-        truskawki: 13,
-        jagody: 15,
-        wieprzowina: 100,
-        ryby: 8,
-        kurczaki: 11,
-        "05ha": 500,
-        "07ha": 750,
-        "1ha": 1200,
-        "14ha": 1650,
-        narzedzia: 50,
-      },
-    },
-    {
-      number: 3,
-      maxPurchases: {
-        sosna: 12,
-        swierk: 12,
-        buk: 3,
-        dab: 3,
-        woda: 15,
-        chleb: 10,
-        truskawki: 3,
-        jagody: 3,
-        wieprzowina: 6,
-        ryby: 9,
-        kurczaki: 10,
-        "05ha": 0,
-        "07ha": 0,
-        "1ha": 0,
-        "14ha": 0,
-        narzedzia: 8,
-      },
-      prices: {
-        sosna: 35,
-        swierk: 40,
-        buk: 90,
-        dab: 100,
-        woda: 6,
-        chleb: 10,
-        truskawki: 15,
-        jagody: 18,
-        wieprzowina: 17,
-        ryby: 8,
-        kurczaki: 11,
-        "05ha": 1000,
-        "07ha": 1500,
-        "1ha": 2400,
-        "14ha": 3300,
-        narzedzia: 50,
-      },
-    },
-    {
-      number: 4,
-      maxPurchases: {
-        sosna: 5,
-        swierk: 5,
-        buk: 5,
-        dab: 5,
-        woda: 30,
-        chleb: 80,
-        truskawki: 20,
-        jagody: 20,
-        wieprzowina: 25,
-        ryby: 9,
-        kurczaki: 0,
-        "05ha": 1,
-        "07ha": 1,
-        "1ha": 1,
-        "14ha": 4,
-        narzedzia: 0,
-      },
-      prices: {
-        sosna: 55,
-        swierk: 60,
-        buk: 75,
-        dab: 90,
-        woda: 3,
-        chleb: 2,
-        truskawki: 4,
-        jagody: 5,
-        wieprzowina: 7,
-        ryby: 8,
-        kurczaki: 111,
-        "05ha": 600,
-        "07ha": 900,
-        "1ha": 1400,
-        "14ha": 1500,
-        narzedzia: 500,
-      },
-    },
-    {
-      number: 5,
-      maxPurchases: {
-        sosna: 35,
-        swierk: 35,
-        buk: 35,
-        dab: 35,
-        woda: 30,
-        chleb: 30,
-        truskawki: 0,
-        jagody: 7,
-        wieprzowina: 8,
-        ryby: 0,
-        kurczaki: 4,
-        "05ha": 3,
-        "07ha": 3,
-        "1ha": 1,
-        "14ha": 0,
-        narzedzia: 4,
-      },
-      prices: {
-        sosna: 15,
-        swierk: 17,
-        buk: 22,
-        dab: 25,
-        woda: 3,
-        chleb: 4,
-        truskawki: 25,
-        jagody: 9,
-        wieprzowina: 13,
-        ryby: 88,
-        kurczaki: 66,
-        "05ha": 300,
-        "07ha": 500,
-        "1ha": 1400,
-        "14ha": 2200,
-        narzedzia: 250,
-      },
-    },
-    {
-      number: 6,
-      maxPurchases: {
-        sosna: 0,
-        swierk: 10,
-        buk: 10,
-        dab: 10,
-        woda: 30,
-        chleb: 30,
-        truskawki: 7,
-        jagody: 7,
-        wieprzowina: 8,
-        ryby: 0,
-        kurczaki: 40,
-        "05ha": 0,
-        "07ha": 0,
-        "1ha": 0,
-        "14ha": 0,
-        narzedzia: 20,
-      },
-      prices: {
-        sosna: 75,
-        swierk: 45,
-        buk: 55,
-        dab: 65,
-        woda: 3,
-        chleb: 4,
-        truskawki: 8,
-        jagody: 9,
-        wieprzowina: 13,
-        ryby: 88,
-        kurczaki: 4,
-        "05ha": 600,
-        "07ha": 1000,
-        "1ha": 2800,
-        "14ha": 4400,
-        narzedzia: 20,
-      },
-    },
-    {
-      number: 7,
-      maxPurchases: {
-        sosna: 15,
-        swierk: 0,
-        buk: 15,
-        dab: 15,
-        woda: 100,
-        chleb: 30,
-        truskawki: 7,
-        jagody: 7,
-        wieprzowina: 8,
-        ryby: 9,
-        kurczaki: 10,
-        "05ha": 2,
-        "07ha": 1,
-        "1ha": 0,
-        "14ha": 1,
-        narzedzia: 8,
-      },
-      prices: {
-        sosna: 25,
-        swierk: 85,
-        buk: 32,
-        dab: 36,
-        woda: 1,
-        chleb: 4,
-        truskawki: 8,
-        jagody: 9,
-        wieprzowina: 13,
-        ryby: 8,
-        kurczaki: 11,
-        "05ha": 500,
-        "07ha": 800,
-        "1ha": 2500,
-        "14ha": 3700,
-        narzedzia: 50,
-      },
-    },
-  ]
 
   // Initialize rounds state with the data
   useEffect(() => {
@@ -786,9 +394,99 @@ export default function Shop() {
               <Button onClick={resetTimer} variant="outline" className="flex-1">
                 <RotateCcw className="h-4 w-4 mr-2" /> Reset
               </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowAdminModal(true)}
+                className="ml-4"
+              >
+                Admin Mode
+              </Button>
             </div>
           </CardContent>
         </Card>
+
+        {isAdminMode && (
+          <div className="p-4 border rounded-md bg-gray-100 mb-8">
+            <h3 className="text-lg font-semibold mb-4">Admin Mode</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Edit Balance */}
+              <div>
+                <label className="block text-sm font-medium mb-1">Balance</label>
+                <Input
+                  type="number"
+                  value={balance}
+                  onChange={(e) => setBalance(Number(e.target.value))}
+                />
+              </div>
+
+              {/* Edit Time */}
+              <div>
+                <label className="block text-sm font-medium mb-1">Time Remaining (seconds)</label>
+                <Input
+                  type="number"
+                  value={timeRemaining}
+                  onChange={(e) => setTimeRemaining(Number(e.target.value))}
+                />
+              </div>
+
+              {/* Edit Inventory */}
+              <div>
+                <label className="block text-sm font-medium mb-1">Inventory</label>
+                <select
+                  onChange={(e) => {
+                    const itemId = e.target.value
+                    const newQuantity = prompt(`Enter new quantity for ${itemId}:`, String(inventory[itemId] || 0))
+                    if (newQuantity !== null) {
+                      setInventory({
+                        ...inventory,
+                        [itemId]: Number(newQuantity),
+                      })
+                    }
+                  }}
+                >
+                  <option value="">Select Item</option>
+                  {allItems.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.name} ({inventory[item.id] || 0})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Clear Local Storage Button */}
+            <Button
+              variant="destructive"
+              onClick={() => {
+                if (confirm("Are you sure you want to clear all data? This action cannot be undone.")) {
+                  localStorage.clear()
+                  setBalance(5000) // Reset balance
+                  setInventory({}) // Reset inventory
+                  setCartItems({}) // Reset cart
+                  setPurchaseHistory([]) // Reset purchase history
+                  setTimeRemaining(70 * 60) // Reset timer
+                  setCurrentRound(1) // Reset round
+                  setPurchasedInRound({}) // Reset purchased items
+                  toast.success("All data has been cleared.")
+                }
+              }}
+              className="mt-4"
+            >
+              Clear All Data
+            </Button>
+
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsAdminMode(false)
+                toast.info("Admin Mode Disabled")
+              }}
+              className="mt-4"
+            >
+              Exit Admin Mode
+            </Button>
+          </div>
+        )}
 
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <h1 className="text-3xl font-bold">Trading Post</h1>
@@ -1067,6 +765,45 @@ export default function Shop() {
             </Button>
             <Button type="submit" onClick={confirmReset} className="ml-2">
               Reset
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={showAdminModal} onOpenChange={setShowAdminModal}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Enter Admin Password</DialogTitle>
+            <DialogDescription>Access admin mode to edit inventory, money, and time.</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <Input
+              id="admin-password"
+              type="password"
+              placeholder="Password"
+              className="col-span-4"
+              value={adminPassword}
+              onChange={(e) => setAdminPassword(e.target.value)}
+            />
+          </div>
+          <div className="flex justify-end">
+            <Button type="button" variant="secondary" onClick={() => setShowAdminModal(false)}>
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              onClick={() => {
+                if (adminPassword === "admin123") {
+                  setIsAdminMode(true)
+                  setShowAdminModal(false)
+                  setAdminPassword("")
+                  toast.success("Admin Mode Enabled")
+                } else {
+                  toast.error("Invalid Password")
+                }
+              }}
+              className="ml-2"
+            >
+              Confirm
             </Button>
           </div>
         </DialogContent>
