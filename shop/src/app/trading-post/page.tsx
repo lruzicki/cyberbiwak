@@ -16,7 +16,7 @@ import { MainNavBar } from "@/components/main-nav-bar" // Import the MainNavBar 
 export default function TradingPost() {
   const [balance, setBalance] = useLocalStorage("shop-balance", 10000)
   const [inventory, setInventory] = useLocalStorage<Record<string, number>>("shop-inventory", {})
-  const [cartItems, setCartItems] = useLocalStorage<Record<string, number>>("shop-cart", {})
+  const [orderedItems, setOrderedItems] = useLocalStorage<Record<string, number>>("shop-ordered-items", {})
   const [purchaseHistory, setPurchaseHistory] = useLocalStorage<Array<{
     id: number
     itemId: string
@@ -59,18 +59,18 @@ export default function TradingPost() {
   }
 
   const handleBuy = (itemId: string, itemName: string, price: number, category: string) => {
+    if (currentRound !== 1) {
+      toast.error("You can only buy products in the first round.")
+      return
+    }
+
     const remainingQuantity = getRemainingQuantity(itemId)
     if (balance >= price && remainingQuantity > 0) {
-      // Deduct balance
       setBalance(parseFloat((balance - price).toFixed(2)))
-
-      // Update inventory
       setInventory({
         ...inventory,
         [itemId]: (inventory[itemId] || 0) + 1,
       })
-
-      // Update purchasedInRound
       setPurchasedInRound({
         ...purchasedInRound,
         [currentRound]: {
@@ -78,8 +78,6 @@ export default function TradingPost() {
           [itemId]: (purchasedInRound[currentRound]?.[itemId] || 0) + 1,
         },
       })
-
-      // Add to purchase history
       setPurchaseHistory([
         ...purchaseHistory,
         {
@@ -93,7 +91,6 @@ export default function TradingPost() {
           round: currentRound,
         },
       ])
-
       toast.success(`You bought 1 ${itemName} for ${price} PLN.`)
     } else {
       toast.error("You don't have enough balance or the item is out of stock.")
@@ -118,6 +115,22 @@ export default function TradingPost() {
     }
   }
 
+  const handleOrder = (itemId: string, itemName: string, price: number) => {
+    const quantity = parseInt(prompt(`How many ${itemName} would you like to order?`, "1") || "0", 10)
+
+    if (isNaN(quantity) || quantity <= 0) {
+      toast.error("Invalid quantity. Please enter a positive number.")
+      return
+    }
+
+    setOrderedItems({
+      ...orderedItems,
+      [itemId]: quantity,
+    })
+
+    toast.success(`You ordered ${quantity} ${itemName}(s) for ${price * quantity} PLN.`)
+  }
+
   const getCategoryIcon = (category: string) => {
     switch (category) {
       case "wood":
@@ -138,7 +151,7 @@ export default function TradingPost() {
       {/* Include the MainNavBar */}
       <MainNavBar
         balance={balance}
-        cartItemsCount={Object.values(cartItems).reduce((a: number, b: number) => a + (b as number), 0)}
+        orderedItemsCount={Object.values(orderedItems).reduce((a: number, b: number) => a + (b as number), 0)}
         onAdminClick={() => setShowAdminModal(true)} // Pass the callback
       />
 
@@ -205,7 +218,7 @@ export default function TradingPost() {
                           <Button
                             onClick={() => handleBuy(item.id, item.name, currentPrice, category)}
                             className="flex-1"
-                            disabled={balance < currentPrice || !timerActive || remainingQuantity <= 0}
+                            disabled={balance < currentPrice || !timerActive || remainingQuantity <= 0 || currentRound !== 1}
                           >
                             Buy
                           </Button>
@@ -216,6 +229,13 @@ export default function TradingPost() {
                             disabled={getInventoryCount(item.id) <= 0 || !timerActive}
                           >
                             Sell
+                          </Button>
+                          <Button
+                            onClick={() => handleOrder(item.id, item.name, currentPrice)}
+                            variant="secondary"
+                            className="flex-1"
+                          >
+                            Order {orderedItems[item.id] ? `(${orderedItems[item.id]})` : ""}
                           </Button>
                         </div>
                       </CardFooter>

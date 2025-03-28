@@ -17,6 +17,7 @@ export default function Shop() {
   const [timeRemaining, setTimeRemaining] = useLocalStorage("shop-time-remaining", 70 * 60)
   const [currentRound, setCurrentRound] = useLocalStorage("shop-current-round", 1)
   const [inventory, setInventory] = useLocalStorage<Record<string, number>>("shop-inventory", {})
+  const [orderedItems, setOrderedItems] = useLocalStorage<Record<string, number>>("shop-ordered-items", {}) // Added orderedItems state
   const [isAdminMode, setIsAdminMode] = useState(false)
   const [showAdminModal, setShowAdminModal] = useState(false)
   const allItems = Object.values(categories).flat()
@@ -63,7 +64,7 @@ export default function Shop() {
       {/* Navbar */}
       <MainNavBar
         balance={parseFloat(balance.toFixed(2))} // Ensure balance is rounded to 2 decimals
-        cartItemsCount={Object.values(inventory).reduce((a, b) => a + b, 0)}
+        orderedItemsCount={Object.values(orderedItems).reduce((a, b) => a + b, 0)} // Updated to use orderedItems
         onAdminClick={() => setShowAdminModal(true)}
       />
 
@@ -80,7 +81,7 @@ export default function Shop() {
           setInventory={setInventory}
           allItems={allItems}
           setIsAdminMode={setIsAdminMode}
-          setCartItems={() => {}} // No cart logic
+          setOrderedItems={setOrderedItems} // Pass orderedItems setter
           setPurchaseHistory={() => {}} // No purchase history logic
           setCurrentRound={setCurrentRound}
           setPurchasedInRound={() => {}} // No purchased items logic
@@ -132,23 +133,21 @@ export default function Shop() {
           {/* Ordered Items Section */}
           <Card className="flex-1">
             <CardHeader>
-              <CardTitle>Ordered Items</CardTitle> {/* Updated title */}
-              <CardDescription>Your ordered items</CardDescription> {/* Updated description */}
+              <CardTitle>Ordered Items</CardTitle>
+              <CardDescription>Your ordered items</CardDescription>
             </CardHeader>
             <CardContent>
-              {Object.keys(inventory).length > 0 && Object.values(inventory).some((quantity) => quantity > 0) ? (
+              {Object.keys(orderedItems).length > 0 ? (
                 <ul className="space-y-2">
-                  {Object.entries(inventory)
-                    .filter(([_, quantity]) => quantity > 0) // Only show items with quantity > 0
-                    .map(([itemId, quantity]) => {
-                      const product = allItems.find((item) => item.id === itemId) // Find the product by ID
-                      return (
-                        <li key={itemId} className="flex justify-between">
-                          <span>{product ? product.name : itemId}</span> {/* Use product name if found */}
-                          <Badge>{quantity}</Badge>
-                        </li>
-                      )
-                    })}
+                  {Object.entries(orderedItems).map(([itemId, quantity]) => {
+                    const product = allItems.find((item) => item.id === itemId) // Find the product by ID
+                    return (
+                      <li key={itemId} className="flex justify-between">
+                        <span>{product ? product.name : itemId}</span> {/* Use product name if found */}
+                        <Badge>{quantity}</Badge>
+                      </li>
+                    )
+                  })}
                 </ul>
               ) : (
                 <p className="text-gray-500">You have no ordered items.</p>

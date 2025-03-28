@@ -17,7 +17,7 @@ interface AdminModeProps {
   setInventory: (inventory: Record<string, number>) => void
   allItems: Array<{ id: string; name: string }>
   setIsAdminMode: (isAdmin: boolean) => void
-  setCartItems: (cart: Record<string, number>) => void
+  setOrderedItems: (cart: Record<string, number>) => void
   setPurchaseHistory: (history: Array<any>) => void
   setCurrentRound: (round: number) => void
   setPurchasedInRound: (purchases: Record<number, Record<string, number>>) => void
@@ -34,7 +34,7 @@ export const AdminMode: React.FC<AdminModeProps> = ({
   setInventory,
   allItems,
   setIsAdminMode,
-  setCartItems,
+  setOrderedItems,
   setPurchaseHistory,
   setCurrentRound,
   setPurchasedInRound,
@@ -125,7 +125,7 @@ export const AdminMode: React.FC<AdminModeProps> = ({
               localStorage.clear()
               setBalance(10000) // Reset balance
               setInventory({}) // Reset inventory
-              setCartItems({}) // Reset cart
+              setOrderedItems({}) // Reset cart
               setPurchaseHistory([]) // Reset purchase history
               setTimeRemaining(70 * 60) // Reset timer
               setCurrentRound(1) // Reset round

@@ -13,7 +13,7 @@ import { MainNavBar } from "@/components/main-nav-bar"
 
 export default function Makro() {
   const [balance, setBalance] = useLocalStorage("shop-balance", 10000)
-  const [cartItems, setCartItems] = useLocalStorage<Record<string, number>>("shop-cart", {})
+  const [orderedItems, setOrderedItems] = useLocalStorage<Record<string, number>>("shop-cart", {})
   const [searchQuery, setSearchQuery] = useState("")
 
   // Catalogs/Flyers
@@ -165,9 +165,9 @@ export default function Makro() {
   const filteredProducts = products.filter((product) => product.name.toLowerCase().includes(searchQuery.toLowerCase()))
 
   const addToCart = (itemId: string) => {
-    setCartItems({
-      ...cartItems,
-      [itemId]: (cartItems[itemId] || 0) + 1,
+    setOrderedItems({
+      ...orderedItems,
+      [itemId]: (orderedItems[itemId] || 0) + 1,
     })
   }
 
@@ -182,7 +182,7 @@ export default function Makro() {
     <div className="min-h-screen bg-gray-100">
       <MainNavBar
         balance={balance}
-        cartItemsCount={Object.values(cartItems).reduce((a: number, b: number) => a + (b as number), 0)}
+        orderedItemsCount={Object.values(orderedItems).reduce((a: number, b: number) => a + (b as number), 0)}
         onAdminClick={() => {
           console.log("Admin button clicked");
         }}

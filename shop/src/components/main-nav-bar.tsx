@@ -11,11 +11,11 @@ import { isWebpackClientOnlyLayer } from "next/dist/build/utils"
 
 interface MainNavBarProps {
   balance: number
-  cartItemsCount: number
+  orderedItemsCount: number
   onAdminClick: () => void
 }
 
-export function MainNavBar({ balance, cartItemsCount, onAdminClick }: MainNavBarProps) {
+export function MainNavBar({ balance, orderedItemsCount, onAdminClick }: MainNavBarProps) {
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -67,9 +67,9 @@ export function MainNavBar({ balance, cartItemsCount, onAdminClick }: MainNavBar
             {/* Cart */}
             <div className="relative">
               <ShoppingCart className="h-5 w-5 text-white" />
-              {cartItemsCount > 0 && (
+              {orderedItemsCount > 0 && (
                 <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center bg-orange-500 text-white">
-                  {cartItemsCount}
+                  {orderedItemsCount}
                 </Badge>
               )}
             </div>
