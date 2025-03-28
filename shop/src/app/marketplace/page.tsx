@@ -91,7 +91,7 @@ export default function Marketplace() {
   const buyItem = (itemId: string, price: number) => {
     const item = listings.find((item) => item.id === itemId)
     if (item && balance >= price) {
-      setBalance(balance - price)
+      setBalance(parseFloat((balance - price).toFixed(2)))
     }
   }
 

@@ -10,7 +10,7 @@ import { useLocalStorage } from "@/hooks/use-local-storage"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { categories } from "@/products/categories"
-import { roundData, Round } from "@/products/roundData"
+import { roundData, Round } from "@/products/round-data"
 import { MainNavBar } from "@/components/main-nav-bar" // Import the MainNavBar component
 
 export default function TradingPost() {
@@ -62,7 +62,7 @@ export default function TradingPost() {
     const remainingQuantity = getRemainingQuantity(itemId)
     if (balance >= price && remainingQuantity > 0) {
       // Deduct balance
-      setBalance(balance - price)
+      setBalance(parseFloat((balance - price).toFixed(2)))
 
       // Update inventory
       setInventory({
@@ -104,7 +104,7 @@ export default function TradingPost() {
     const inventoryCount = getInventoryCount(itemId)
     if (inventoryCount > 0) {
       // Add balance
-      setBalance(balance + price)
+      setBalance(parseFloat((balance + price).toFixed(2)))
 
       // Update inventory
       setInventory({

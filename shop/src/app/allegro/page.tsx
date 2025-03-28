@@ -138,7 +138,7 @@ export default function Allegro() {
   const buyItem = (itemId: string, price: number) => {
     const item = products.find((item) => item.id === itemId)
     if (item && balance >= price) {
-      setBalance(balance - price)
+      setBalance(parseFloat((balance - price).toFixed(2)))
     }
   }
 

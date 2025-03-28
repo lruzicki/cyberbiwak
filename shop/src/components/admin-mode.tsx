@@ -49,7 +49,7 @@ export const AdminMode: React.FC<AdminModeProps> = ({
           <Input
             type="number"
             value={balance}
-            onChange={(e) => setBalance(Number(e.target.value))}
+            onChange={(e) => setBalance(parseFloat(Number(e.target.value).toFixed(2)))}
           />
         </div>
 
@@ -123,7 +123,7 @@ export const AdminMode: React.FC<AdminModeProps> = ({
           onClick={() => {
             if (confirm("Are you sure you want to clear all data? This action cannot be undone.")) {
               localStorage.clear()
-              setBalance(5000) // Reset balance
+              setBalance(10000) // Reset balance
               setInventory({}) // Reset inventory
               setCartItems({}) // Reset cart
               setPurchaseHistory([]) // Reset purchase history

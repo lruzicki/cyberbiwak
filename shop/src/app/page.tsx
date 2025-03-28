@@ -5,21 +5,22 @@ import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
 import { MainNavBar } from "@/components/main-nav-bar"
 import { AdminMode } from "@/components/admin-mode"
-import { AdminPasswordModal } from "@/components/admin-password-modal" // Import the new component
+import { AdminPasswordModal } from "@/components/admin-password-modal"
 import { useLocalStorage } from "@/hooks/use-local-storage"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
+import { categories } from "@/products/categories"
 
 export default function Shop() {
-  const [balance, setBalance] = useLocalStorage("shop-balance", 5000)
+  const [balance, setBalance] = useLocalStorage("shop-balance", 10000)
   const [timerActive, setTimerActive] = useLocalStorage("shop-timer-active", false)
   const [timeRemaining, setTimeRemaining] = useLocalStorage("shop-time-remaining", 70 * 60)
   const [currentRound, setCurrentRound] = useLocalStorage("shop-current-round", 1)
   const [inventory, setInventory] = useLocalStorage<Record<string, number>>("shop-inventory", {})
   const [isAdminMode, setIsAdminMode] = useState(false)
   const [showAdminModal, setShowAdminModal] = useState(false)
+  const allItems = Object.values(categories).flat()
 
-  // Timer functions
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60)
     const remainingSeconds = seconds % 60
@@ -61,23 +62,23 @@ export default function Shop() {
     <div>
       {/* Navbar */}
       <MainNavBar
-        balance={balance}
-        cartItemsCount={Object.values(inventory).reduce((a, b) => a + b, 0)} // Inventory count as cart items
-        onAdminClick={() => setShowAdminModal(true)} // Pass the callback
+        balance={parseFloat(balance.toFixed(2))} // Ensure balance is rounded to 2 decimals
+        cartItemsCount={Object.values(inventory).reduce((a, b) => a + b, 0)}
+        onAdminClick={() => setShowAdminModal(true)}
       />
 
       {/* Admin Mode */}
       {isAdminMode && (
         <AdminMode
           balance={balance}
-          setBalance={setBalance}
+          setBalance={(newBalance) => setBalance(parseFloat(newBalance.toFixed(2)))} // Round balance when updating
           timeRemaining={timeRemaining}
           setTimeRemaining={setTimeRemaining}
           timerActive={timerActive}
           setTimerActive={setTimerActive}
           inventory={inventory}
           setInventory={setInventory}
-          allItems={[]} // No items here
+          allItems={allItems}
           setIsAdminMode={setIsAdminMode}
           setCartItems={() => {}} // No cart logic
           setPurchaseHistory={() => {}} // No purchase history logic
@@ -101,7 +102,7 @@ export default function Shop() {
           </CardContent>
         </Card>
 
-        {/* Inventory and Balance Section */}
+        {/* Inventory, Ordered Items, and Balance Section */}
         <div className="flex flex-col md:flex-row gap-8">
           {/* Inventory Section */}
           <Card className="flex-1">
@@ -112,15 +113,45 @@ export default function Shop() {
             <CardContent>
               {Object.keys(inventory).length > 0 ? (
                 <ul className="space-y-2">
-                  {Object.entries(inventory).map(([item, quantity]) => (
-                    <li key={item} className="flex justify-between">
-                      <span>{item}</span>
-                      <Badge>{quantity}</Badge>
-                    </li>
-                  ))}
+                  {Object.entries(inventory).map(([itemId, quantity]) => {
+                    const product = allItems.find((item) => item.id === itemId) // Find the product by ID
+                    return (
+                      <li key={itemId} className="flex justify-between">
+                        <span>{product ? product.name : itemId}</span> {/* Use product name if found */}
+                        <Badge>{quantity}</Badge>
+                      </li>
+                    )
+                  })}
                 </ul>
               ) : (
                 <p className="text-gray-500">Your inventory is empty.</p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Ordered Items Section */}
+          <Card className="flex-1">
+            <CardHeader>
+              <CardTitle>Ordered Items</CardTitle> {/* Updated title */}
+              <CardDescription>Your ordered items</CardDescription> {/* Updated description */}
+            </CardHeader>
+            <CardContent>
+              {Object.keys(inventory).length > 0 && Object.values(inventory).some((quantity) => quantity > 0) ? (
+                <ul className="space-y-2">
+                  {Object.entries(inventory)
+                    .filter(([_, quantity]) => quantity > 0) // Only show items with quantity > 0
+                    .map(([itemId, quantity]) => {
+                      const product = allItems.find((item) => item.id === itemId) // Find the product by ID
+                      return (
+                        <li key={itemId} className="flex justify-between">
+                          <span>{product ? product.name : itemId}</span> {/* Use product name if found */}
+                          <Badge>{quantity}</Badge>
+                        </li>
+                      )
+                    })}
+                </ul>
+              ) : (
+                <p className="text-gray-500">You have no ordered items.</p>
               )}
             </CardContent>
           </Card>
@@ -132,7 +163,7 @@ export default function Shop() {
               <CardDescription>Manage your balance here</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center text-2xl font-bold">{balance} PLN</div>
+              <div className="text-center text-2xl font-bold">{balance.toFixed(2)} PLN</div>
             </CardContent>
           </Card>
         </div>

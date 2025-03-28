@@ -3,7 +3,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 interface AdminPasswordModalProps {
   isOpen: boolean
@@ -13,6 +13,12 @@ interface AdminPasswordModalProps {
 
 export function AdminPasswordModal({ isOpen, onClose, onConfirm }: AdminPasswordModalProps) {
   const [password, setPassword] = useState("")
+
+  useEffect(() => {
+    if (!isOpen) {
+      setPassword("") // Clear the password when the modal is closed
+    }
+  }, [isOpen])
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -39,7 +45,7 @@ export function AdminPasswordModal({ isOpen, onClose, onConfirm }: AdminPassword
             className="ml-2"
             onClick={() => {
               onConfirm(password)
-              setPassword("") // Clear the password field after confirmation
+              setPassword("") // Clear the password after confirmation
             }}
           >
             Confirm

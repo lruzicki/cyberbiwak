@@ -1,11 +1,14 @@
 "use client"
 
 import Link from "next/link"
-import { ShoppingCart, User, Home, Store, Package, Building, ShoppingBag } from "lucide-react"
+import { ShoppingCart, Home, Store, Package, Building, ShoppingBag, User } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { useState } from "react"
+import { AdminPasswordModal } from "@/components/admin-password-modal"
+import { useEffect, useState } from "react"
+import { isWebpackClientOnlyLayer } from "next/dist/build/utils"
+
 interface MainNavBarProps {
   balance: number
   cartItemsCount: number
@@ -13,7 +16,12 @@ interface MainNavBarProps {
 }
 
 export function MainNavBar({ balance, cartItemsCount, onAdminClick }: MainNavBarProps) {
-  const [showAdminModal, setShowAdminModal] = useState(false)
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+  
   return (
     <div className="bg-gray-800 text-white sticky top-0 left-0 right-0 z-50">
       <div className="container mx-auto px-4">
@@ -106,11 +114,11 @@ export function MainNavBar({ balance, cartItemsCount, onAdminClick }: MainNavBar
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-                        {/* Admin Mode Button */}
-            {typeof window !== "undefined" && window.location.pathname === "/" && (
+
+            {isClient && window.location.pathname === "/" && (
               <Button
               variant="outline"
-              onClick={() => setShowAdminModal(true)}
+              onClick={() => onAdminClick()}
               className="ml-4 text-gray-800 border-gray-800 hover:bg-gray-100"
               >
               Admin Mode
@@ -119,7 +127,12 @@ export function MainNavBar({ balance, cartItemsCount, onAdminClick }: MainNavBar
           </div>
         </div>
       </div>
+
     </div>
   )
+}
+
+function setIsClient(arg0: boolean) {
+  throw new Error("Function not implemented.")
 }
 

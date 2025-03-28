@@ -174,7 +174,7 @@ export default function Makro() {
   const buyItem = (itemId: string, price: number) => {
     const item = [...products, ...catalogs].find((item) => item.id === itemId)
     if (item && balance >= price) {
-      setBalance(balance - price)
+      setBalance(parseFloat((balance - price).toFixed(2)))
     }
   }
 
