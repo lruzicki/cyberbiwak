@@ -12,8 +12,9 @@ interface UseTimerOptions {
 
 export const useTimer = ({ initialTargetTime, timerActive, totalRounds, onTimerEnd, updateTargetTime }: UseTimerOptions) => {
     const [targetTime, setTargetTime] = useLocalStorage("shop-target-time", Date.now() + 70 * 60 * 1000) // Use targetTime from local storage
+    const [currentRound, setCurrentRound] = useLocalStorage("shop-current-round", 1)
     const [timeRemaining, setTimeRemaining] = useState(() => Math.max(0, Math.ceil((initialTargetTime - Date.now()) / 1000)))
-
+    
     const calculateTimeLeft = () => { 
     const now = Date.now()
     return Math.max(0, Math.ceil((targetTime - now) / 1000)) // Time left in seconds
@@ -23,10 +24,8 @@ export const useTimer = ({ initialTargetTime, timerActive, totalRounds, onTimerE
     const totalTime = 70 * 60 // Total time in seconds (70 minutes)
     const roundDuration = totalTime / totalRounds // Duration of each round in seconds
     const elapsedTime = totalTime - timeRemaining // Time elapsed in seconds
-    return Math.min(totalRounds, Math.ceil(elapsedTime / roundDuration)) // Calculate the current round
+    return Math.min(totalRounds, Math.max(Math.ceil(elapsedTime / roundDuration), 1)) // Calculate the current round
   }
-
-  const [currentRound, setCurrentRound] = useState(calculateCurrentRound)
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null
@@ -35,6 +34,7 @@ export const useTimer = ({ initialTargetTime, timerActive, totalRounds, onTimerE
       interval = setInterval(() => {
         setTimeRemaining(calculateTimeLeft())
         setCurrentRound(calculateCurrentRound()) // Update the round dynamically
+        console.log("Current Round:", calculateCurrentRound()) // Log the current round
       }, 1000)
     } else if (timerActive && timeRemaining === 0) {
       if (onTimerEnd) onTimerEnd()
@@ -44,6 +44,7 @@ export const useTimer = ({ initialTargetTime, timerActive, totalRounds, onTimerE
     } else if (!timerActive) {
         interval = setInterval(() => {
             setTargetTime((prevTargetTime) => prevTargetTime + 1000) // Increment targetTime by 1 second
+            setCurrentRound(calculateCurrentRound())
         }, 1000)
     }
 

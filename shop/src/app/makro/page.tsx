@@ -10,11 +10,22 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useLocalStorage } from "@/hooks/use-local-storage"
 import { MainNavBar } from "@/components/main-nav-bar"
+import { useTimer } from "@/utils/use-timer" // Adjust the path based on your project structure
 
 export default function Makro() {
   const [balance, setBalance] = useLocalStorage("shop-balance", 10000)
   const [orderedItems, setOrderedItems] = useLocalStorage<Record<string, number>>("shop-ordered-items", {})
   const [searchQuery, setSearchQuery] = useState("")
+  const [targetTime, setTargetTime] = useLocalStorage("shop-target-time", Date.now() + 70 * 60 * 1000) // Use targetTime from local storage
+  const [timerActive, setTimerActive] = useLocalStorage("shop-timer-active", false)
+
+  const { timeRemaining, setTimeRemaining, currentRound } = useTimer({
+    initialTargetTime: targetTime,
+    timerActive,
+    totalRounds: 7, // Define 7 rounds
+    onTimerEnd: () => setTimerActive(false), // Stop the timer when it ends
+    updateTargetTime: setTargetTime, // Update targetTime in local storage
+  })
 
   // Catalogs/Flyers
   const catalogs = [
@@ -183,6 +194,7 @@ export default function Makro() {
       <MainNavBar
         balance={balance}
         orderedItemsCount={Object.values(orderedItems).reduce((a: number, b: number) => a + (b as number), 0)}
+        currentRound={currentRound} // Pass the current round to the MainNavBar
         onAdminClick={() => {
           console.log("Admin button clicked");
         }}

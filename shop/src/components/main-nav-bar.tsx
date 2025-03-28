@@ -7,21 +7,21 @@ import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { AdminPasswordModal } from "@/components/admin-password-modal"
 import { useEffect, useState } from "react"
-import { isWebpackClientOnlyLayer } from "next/dist/build/utils"
 
 interface MainNavBarProps {
   balance: number
   orderedItemsCount: number
+  currentRound: number // Add currentRound as a prop
   onAdminClick: () => void
 }
 
-export function MainNavBar({ balance, orderedItemsCount, onAdminClick }: MainNavBarProps) {
-  const [isClient, setIsClient] = useState(false);
+export function MainNavBar({ balance, orderedItemsCount, currentRound, onAdminClick }: MainNavBarProps) {
+  const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
-    setIsClient(true);
-  }, []);
-  
+    setIsClient(true)
+  }, [])
+
   return (
     <div className="bg-gray-800 text-white sticky top-0 left-0 right-0 z-50">
       <div className="container mx-auto px-4">
@@ -57,6 +57,13 @@ export function MainNavBar({ balance, orderedItemsCount, onAdminClick }: MainNav
           </div>
 
           <div className="flex items-center space-x-4">
+            {/* Current Round */}
+            <div className="hidden md:block">
+              <Badge variant="outline" className="text-sm text-white border-white">
+                Round: {currentRound}
+              </Badge>
+            </div>
+
             {/* Balance */}
             <div className="hidden md:block">
               <Badge variant="outline" className="text-sm text-white border-white">
@@ -117,22 +124,17 @@ export function MainNavBar({ balance, orderedItemsCount, onAdminClick }: MainNav
 
             {isClient && window.location.pathname === "/" && (
               <Button
-              variant="outline"
-              onClick={() => onAdminClick()}
-              className="ml-4 text-gray-800 border-gray-800 hover:bg-gray-100"
+                variant="outline"
+                onClick={() => onAdminClick()}
+                className="ml-4 text-gray-800 border-gray-800 hover:bg-gray-100"
               >
-              Admin Mode
+                Admin Mode
               </Button>
             )}
           </div>
         </div>
       </div>
-
     </div>
   )
-}
-
-function setIsClient(arg0: boolean) {
-  throw new Error("Function not implemented.")
 }
 

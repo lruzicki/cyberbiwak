@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useLocalStorage } from "@/hooks/use-local-storage"
 import { MainNavBar } from "@/components/main-nav-bar"
+import { useTimer } from "@/utils/use-timer" // Adjust the path based on your project structure
 
 export default function Nieruchomosci() {
   const [balance, setBalance] = useLocalStorage("shop-balance", 10000)
@@ -17,6 +18,16 @@ export default function Nieruchomosci() {
   const [propertyType, setPropertyType] = useState("Kupię")
   const [propertyCategory, setPropertyCategory] = useState("Działka")
   const [location, setLocation] = useState("Gołubie")
+  const [targetTime, setTargetTime] = useLocalStorage("shop-target-time", Date.now() + 70 * 60 * 1000) // Use targetTime from local storage
+  const [timerActive, setTimerActive] = useLocalStorage("shop-timer-active", false)
+
+  const { timeRemaining, setTimeRemaining, currentRound } = useTimer({
+    initialTargetTime: targetTime,
+    timerActive,
+    totalRounds: 7, // Define 7 rounds
+    onTimerEnd: () => setTimerActive(false), // Stop the timer when it ends
+    updateTargetTime: setTargetTime, // Update targetTime in local storage
+  })
 
   // Real estate listings
   const properties = [
@@ -142,6 +153,7 @@ export default function Nieruchomosci() {
       <MainNavBar
         balance={balance}
         orderedItemsCount={Object.values(orderedItems).reduce((a: number, b: number) => a + (b as number), 0)}
+        currentRound={currentRound} // Pass the current round to the MainNavBar
         onAdminClick={() => {
           console.log("Admin button clicked");
         }}

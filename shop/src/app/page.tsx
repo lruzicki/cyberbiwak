@@ -7,7 +7,7 @@ import { MainNavBar } from "@/components/main-nav-bar"
 import { AdminMode } from "@/components/admin-mode"
 import { AdminPasswordModal } from "@/components/admin-password-modal"
 import { useLocalStorage } from "@/hooks/use-local-storage"
-import { useTimer } from "@/utils/useTimer" // Import the custom hook
+import { useTimer } from "@/utils/use-timer" // Import the custom hook
 import { useState } from "react"
 import { toast } from "sonner"
 import { categories } from "@/products/products"
@@ -58,6 +58,7 @@ export default function Shop() {
       <MainNavBar
         balance={parseFloat(balance.toFixed(2))} // Ensure balance is rounded to 2 decimals
         orderedItemsCount={Object.values(orderedItems).reduce((a, b) => a + b, 0)} // Updated to use orderedItems
+        currentRound={currentRound} // Pass the current round to the MainNavBar
         onAdminClick={() => setShowAdminModal(true)}
       />
 

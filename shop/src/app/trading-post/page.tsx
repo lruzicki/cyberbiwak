@@ -13,6 +13,7 @@ import { categories } from "@/products/products"
 import { roundData, Round } from "@/products/round-data"
 import { MainNavBar } from "@/components/main-nav-bar" // Import the MainNavBar component
 import { handleBuy, handleOrder } from "@/utils/shop-actions" // Import the utility functions
+import { useTimer } from "@/utils/use-timer" // Import the useTimer hook
 
 export default function TradingPost() {
   const [balance, setBalance] = useLocalStorage("shop-balance", 10000)
@@ -30,12 +31,19 @@ export default function TradingPost() {
   }>>("purchase-history", [])
   const [timerActive, setTimerActive] = useLocalStorage("shop-timer-active", false)
   const [targetTime, setTargetTime] = useLocalStorage("shop-target-time", Date.now() + 70 * 60 * 1000)
-  const [currentRound, setCurrentRound] = useLocalStorage("shop-current-round", 1)
   const [rounds, setRounds] = useState<Round[]>([])
   const [purchasedInRound, setPurchasedInRound] = useLocalStorage<Record<number, Record<string, number>>>("purchased-in-round", {})
   const [showAdminModal, setShowAdminModal] = useState(false)
 
   const allItems = Object.values(categories).flat()
+
+  const { timeRemaining, setTimeRemaining, currentRound } = useTimer({
+    initialTargetTime: targetTime,
+    timerActive,
+    totalRounds: 7, // Define 7 rounds
+    onTimerEnd: () => setTimerActive(false), // Stop the timer when it ends
+    updateTargetTime: setTargetTime, // Update targetTime in local storage
+  })
 
   useEffect(() => {
     setRounds(roundData)
@@ -80,6 +88,7 @@ export default function TradingPost() {
       <MainNavBar
         balance={balance}
         orderedItemsCount={Object.values(orderedItems).reduce((a: number, b: number) => a + (b as number), 0)}
+        currentRound={currentRound} // Pass the current round to the MainNavBar
         onAdminClick={() => setShowAdminModal(true)} // Pass the callback
       />
 
