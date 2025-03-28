@@ -12,7 +12,7 @@ import { useLocalStorage } from "@/hooks/use-local-storage"
 import { MainNavBar } from "@/components/main-nav-bar"
 
 export default function Allegro() {
-  const [balance, setBalance] = useLocalStorage("shop-balance", 5000)
+  const [balance, setBalance] = useLocalStorage("shop-balance", 10000)
   const [cartItems, setCartItems] = useLocalStorage<Record<string, number>>("shop-cart", {})
   const [searchQuery, setSearchQuery] = useState("")
 
@@ -147,6 +147,9 @@ export default function Allegro() {
       <MainNavBar
         balance={balance}
         cartItemsCount={Object.values(cartItems as Record<string, number>).reduce((a, b) => a + b, 0)}
+        onAdminClick={() => {
+          console.log("Admin button clicked");
+        }}
       />
 
       {/* Custom Allegro Navbar */}

@@ -5,14 +5,15 @@ import { ShoppingCart, User, Home, Store, Package, Building, ShoppingBag } from 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-
+import { useState } from "react"
 interface MainNavBarProps {
   balance: number
   cartItemsCount: number
+  onAdminClick: () => void
 }
 
-export function MainNavBar({ balance, cartItemsCount }: MainNavBarProps) {
-  // No state or effects in this component to avoid loops
+export function MainNavBar({ balance, cartItemsCount, onAdminClick }: MainNavBarProps) {
+  const [showAdminModal, setShowAdminModal] = useState(false)
   return (
     <div className="bg-gray-800 text-white sticky top-0 left-0 right-0 z-50">
       <div className="container mx-auto px-4">
@@ -21,6 +22,10 @@ export function MainNavBar({ balance, cartItemsCount }: MainNavBarProps) {
             {/* Navigation links */}
             <nav className="flex space-x-4">
               <Link href="/" className="flex items-center text-white hover:text-gray-300">
+                <Home className="h-4 w-4 mr-1" />
+                <span>Home</span>
+              </Link>
+              <Link href="/trading-post" className="flex items-center text-white hover:text-gray-300">
                 <Home className="h-4 w-4 mr-1" />
                 <span>Trading Post</span>
               </Link>
@@ -101,6 +106,16 @@ export function MainNavBar({ balance, cartItemsCount }: MainNavBarProps) {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+                        {/* Admin Mode Button */}
+            {typeof window !== "undefined" && window.location.pathname === "/" && (
+              <Button
+              variant="outline"
+              onClick={() => setShowAdminModal(true)}
+              className="ml-4 text-gray-800 border-gray-800 hover:bg-gray-100"
+              >
+              Admin Mode
+              </Button>
+            )}
           </div>
         </div>
       </div>

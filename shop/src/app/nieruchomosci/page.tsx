@@ -11,7 +11,7 @@ import { useLocalStorage } from "@/hooks/use-local-storage"
 import { MainNavBar } from "@/components/main-nav-bar"
 
 export default function Nieruchomosci() {
-  const [balance, setBalance] = useLocalStorage("shop-balance", 5000)
+  const [balance, setBalance] = useLocalStorage("shop-balance", 10000)
   const [cartItems, setCartItems] = useLocalStorage<Record<string, number>>("shop-cart", {})
   const [searchQuery, setSearchQuery] = useState("")
   const [propertyType, setPropertyType] = useState("Kupię")
@@ -142,6 +142,9 @@ export default function Nieruchomosci() {
       <MainNavBar
         balance={balance}
         cartItemsCount={Object.values(cartItems).reduce((a: number, b: number) => a + (b as number), 0)}
+        onAdminClick={() => {
+          console.log("Admin button clicked");
+        }}
       />
 
       {/* Nieruchomosci-online header */}

@@ -11,7 +11,7 @@ import { useLocalStorage } from "@/hooks/use-local-storage"
 import { MainNavBar } from "@/components/main-nav-bar"
 
 export default function Marketplace() {
-  const [balance, setBalance] = useLocalStorage("shop-balance", 5000)
+  const [balance, setBalance] = useLocalStorage("shop-balance", 10000)
   const [cartItems, setCartItems] = useLocalStorage<Record<string, number>>("shop-cart", {})
   const [searchQuery, setSearchQuery] = useState("")
 
@@ -100,6 +100,9 @@ export default function Marketplace() {
       <MainNavBar
         balance={balance}
         cartItemsCount={Object.values(cartItems).reduce((a: number, b: number) => a + (b as number), 0)}
+        onAdminClick={() => {
+          console.log("Admin button clicked");
+        }}
       />
 
       <div className="container mx-auto py-8 px-4">
