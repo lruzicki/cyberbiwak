@@ -21,6 +21,8 @@ interface AdminModeProps {
   setPurchaseHistory: (history: Array<any>) => void
   setCurrentRound: (round: number) => void
   setPurchasedInRound: (purchases: Record<number, Record<string, number>>) => void
+  targetTime: number
+  setTargetTime: (time: number) => void
 }
 
 export const AdminMode: React.FC<AdminModeProps> = ({
@@ -38,6 +40,8 @@ export const AdminMode: React.FC<AdminModeProps> = ({
   setPurchaseHistory,
   setCurrentRound,
   setPurchasedInRound,
+  targetTime,
+  setTargetTime,
 }) => {
   return (
     <div className="p-4 border rounded-md bg-gray-100 mb-8">
@@ -59,7 +63,10 @@ export const AdminMode: React.FC<AdminModeProps> = ({
           <Input
             type="number"
             value={timeRemaining}
-            onChange={(e) => setTimeRemaining(Number(e.target.value))}
+            onChange={(e) => {
+              setTimeRemaining(Number(e.target.value))
+              setTargetTime(Date.now() + Number(e.target.value) * 1000)
+            }}
           />
         </div>
 
@@ -130,6 +137,7 @@ export const AdminMode: React.FC<AdminModeProps> = ({
               setTimeRemaining(70 * 60) // Reset timer
               setCurrentRound(1) // Reset round
               setPurchasedInRound({}) // Reset purchased items
+              setTargetTime(Date.now() + 70 * 60 * 1000) // Reset target time
               toast.success("All data has been cleared.")
             }
           }}

@@ -20,37 +20,38 @@ export function AdminPasswordModal({ isOpen, onClose, onConfirm }: AdminPassword
     }
   }, [isOpen])
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault() // Prevent default form submission behavior
+    onConfirm(password)
+    setPassword("") // Clear the password after confirmation
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Enter Admin Password</DialogTitle>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <Input
-            id="admin-password"
-            type="password"
-            placeholder="Password"
-            className="col-span-4"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-        <div className="flex justify-end">
-          <Button type="button" variant="secondary" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            className="ml-2"
-            onClick={() => {
-              onConfirm(password)
-              setPassword("") // Clear the password after confirmation
-            }}
-          >
-            Confirm
-          </Button>
-        </div>
+        <form onSubmit={handleSubmit}>
+          <div className="grid gap-4 py-4">
+            <Input
+              id="admin-password"
+              type="password"
+              placeholder="Password"
+              className="col-span-4"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+          <div className="flex justify-end">
+            <Button type="button" variant="secondary" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button type="submit" className="ml-2">
+              Confirm
+            </Button>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
   )

@@ -9,9 +9,10 @@ import Image from "next/image"
 import { useLocalStorage } from "@/hooks/use-local-storage"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
-import { categories } from "@/products/categories"
+import { categories } from "@/products/products"
 import { roundData, Round } from "@/products/round-data"
 import { MainNavBar } from "@/components/main-nav-bar" // Import the MainNavBar component
+import { handleBuy, handleOrder } from "@/utils/shop-actions" // Import the utility functions
 
 export default function TradingPost() {
   const [balance, setBalance] = useLocalStorage("shop-balance", 10000)
@@ -28,7 +29,7 @@ export default function TradingPost() {
     round: number
   }>>("purchase-history", [])
   const [timerActive, setTimerActive] = useLocalStorage("shop-timer-active", false)
-  const [timeRemaining, setTimeRemaining] = useLocalStorage("shop-time-remaining", 70 * 60)
+  const [targetTime, setTargetTime] = useLocalStorage("shop-target-time", Date.now() + 70 * 60 * 1000)
   const [currentRound, setCurrentRound] = useLocalStorage("shop-current-round", 1)
   const [rounds, setRounds] = useState<Round[]>([])
   const [purchasedInRound, setPurchasedInRound] = useLocalStorage<Record<number, Record<string, number>>>("purchased-in-round", {})
@@ -56,79 +57,6 @@ export default function TradingPost() {
 
   const getInventoryCount = (itemId: string) => {
     return inventory[itemId] || 0
-  }
-
-  const handleBuy = (itemId: string, itemName: string, price: number, category: string) => {
-    if (currentRound !== 1) {
-      toast.error("You can only buy products in the first round.")
-      return
-    }
-
-    const remainingQuantity = getRemainingQuantity(itemId)
-    if (balance >= price && remainingQuantity > 0) {
-      setBalance(parseFloat((balance - price).toFixed(2)))
-      setInventory({
-        ...inventory,
-        [itemId]: (inventory[itemId] || 0) + 1,
-      })
-      setPurchasedInRound({
-        ...purchasedInRound,
-        [currentRound]: {
-          ...purchasedInRound[currentRound],
-          [itemId]: (purchasedInRound[currentRound]?.[itemId] || 0) + 1,
-        },
-      })
-      setPurchaseHistory([
-        ...purchaseHistory,
-        {
-          id: Date.now(),
-          itemId,
-          itemName,
-          price,
-          quantity: 1,
-          date: new Date().toISOString(),
-          category,
-          round: currentRound,
-        },
-      ])
-      toast.success(`You bought 1 ${itemName} for ${price} PLN.`)
-    } else {
-      toast.error("You don't have enough balance or the item is out of stock.")
-    }
-  }
-
-  const handleSell = (itemId: string, itemName: string, price: number) => {
-    const inventoryCount = getInventoryCount(itemId)
-    if (inventoryCount > 0) {
-      // Add balance
-      setBalance(parseFloat((balance + price).toFixed(2)))
-
-      // Update inventory
-      setInventory({
-        ...inventory,
-        [itemId]: inventory[itemId] - 1,
-      })
-
-      toast.success(`You sold 1 ${itemName} for ${price} PLN.`)
-    } else {
-      toast.error("You don't have this item in your inventory.")
-    }
-  }
-
-  const handleOrder = (itemId: string, itemName: string, price: number) => {
-    const quantity = parseInt(prompt(`How many ${itemName} would you like to order?`, "1") || "0", 10)
-
-    if (isNaN(quantity) || quantity <= 0) {
-      toast.error("Invalid quantity. Please enter a positive number.")
-      return
-    }
-
-    setOrderedItems({
-      ...orderedItems,
-      [itemId]: quantity,
-    })
-
-    toast.success(`You ordered ${quantity} ${itemName}(s) for ${price * quantity} PLN.`)
   }
 
   const getCategoryIcon = (category: string) => {
@@ -215,23 +143,32 @@ export default function TradingPost() {
                           <span>In inventory: {getInventoryCount(item.id)}</span>
                         </div>
                         <div className="flex gap-2 w-full">
+                            {currentRound === 1 && (
+                              <Button
+                                onClick={() => handleBuy(
+                                  item.id,
+                                  item.name,
+                                  currentPrice,
+                                  category,
+                                  currentRound,
+                                  balance,
+                                  setBalance,
+                                  inventory,
+                                  setInventory,
+                                  purchasedInRound,
+                                  setPurchasedInRound,
+                                  purchaseHistory,
+                                  setPurchaseHistory,
+                                  getRemainingQuantity(item.id) // Pass the remaining quantity
+                                )}
+                                className="flex-1"
+                                disabled={getRemainingQuantity(item.id) <= 0 || currentPrice > balance || !timerActive}
+                              >
+                                Buy
+                              </Button>
+                            )}
                           <Button
-                            onClick={() => handleBuy(item.id, item.name, currentPrice, category)}
-                            className="flex-1"
-                            disabled={balance < currentPrice || !timerActive || remainingQuantity <= 0 || currentRound !== 1}
-                          >
-                            Buy
-                          </Button>
-                          <Button
-                            onClick={() => handleSell(item.id, item.name, currentPrice)}
-                            variant="outline"
-                            className="flex-1"
-                            disabled={getInventoryCount(item.id) <= 0 || !timerActive}
-                          >
-                            Sell
-                          </Button>
-                          <Button
-                            onClick={() => handleOrder(item.id, item.name, currentPrice)}
+                            onClick={() => handleOrder(item.id, item.name, currentPrice, { [item.id]: orderedItems[item.id] || 0 }, setOrderedItems)}
                             variant="secondary"
                             className="flex-1"
                           >

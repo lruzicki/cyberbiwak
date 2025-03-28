@@ -12,7 +12,7 @@ import { MainNavBar } from "@/components/main-nav-bar"
 
 export default function Nieruchomosci() {
   const [balance, setBalance] = useLocalStorage("shop-balance", 10000)
-  const [orderedItems, setOrderedItems] = useLocalStorage<Record<string, number>>("shop-cart", {})
+  const [orderedItems, setOrderedItems] = useLocalStorage<Record<string, number>>("shop-ordered-items", {})
   const [searchQuery, setSearchQuery] = useState("")
   const [propertyType, setPropertyType] = useState("Kupię")
   const [propertyCategory, setPropertyCategory] = useState("Działka")

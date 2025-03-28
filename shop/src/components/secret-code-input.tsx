@@ -2,7 +2,7 @@
 
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
-import { categories } from "@/products/categories"
+import { categories } from "@/products/products"
 import { useState } from "react"
 
 interface SecretCodeInputProps {

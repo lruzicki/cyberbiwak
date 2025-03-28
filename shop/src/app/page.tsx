@@ -7,20 +7,28 @@ import { MainNavBar } from "@/components/main-nav-bar"
 import { AdminMode } from "@/components/admin-mode"
 import { AdminPasswordModal } from "@/components/admin-password-modal"
 import { useLocalStorage } from "@/hooks/use-local-storage"
-import { useEffect, useState } from "react"
+import { useTimer } from "@/utils/useTimer" // Import the custom hook
+import { useState } from "react"
 import { toast } from "sonner"
-import { categories } from "@/products/categories"
+import { categories } from "@/products/products"
 
 export default function Shop() {
   const [balance, setBalance] = useLocalStorage("shop-balance", 10000)
   const [timerActive, setTimerActive] = useLocalStorage("shop-timer-active", false)
-  const [timeRemaining, setTimeRemaining] = useLocalStorage("shop-time-remaining", 70 * 60)
-  const [currentRound, setCurrentRound] = useLocalStorage("shop-current-round", 1)
+  const [targetTime, setTargetTime] = useLocalStorage("shop-target-time", Date.now() + 70 * 60 * 1000) // Use targetTime from local storage
   const [inventory, setInventory] = useLocalStorage<Record<string, number>>("shop-inventory", {})
-  const [orderedItems, setOrderedItems] = useLocalStorage<Record<string, number>>("shop-ordered-items", {}) // Added orderedItems state
+  const [orderedItems, setOrderedItems] = useLocalStorage<Record<string, number>>("shop-ordered-items", {})
   const [isAdminMode, setIsAdminMode] = useState(false)
   const [showAdminModal, setShowAdminModal] = useState(false)
   const allItems = Object.values(categories).flat()
+
+  const { timeRemaining, setTimeRemaining, currentRound } = useTimer({
+    initialTargetTime: targetTime,
+    timerActive,
+    totalRounds: 7, // Define 7 rounds
+    onTimerEnd: () => setTimerActive(false), // Stop the timer when it ends
+    updateTargetTime: setTargetTime, // Update targetTime in local storage
+  })
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60)
@@ -30,25 +38,6 @@ export default function Shop() {
 
   const timerProgress = ((70 * 60 - timeRemaining) / (70 * 60)) * 100
 
-  useEffect(() => {
-    let interval: NodeJS.Timeout | null = null
-
-    if (timerActive && timeRemaining > 0) {
-      interval = setInterval(() => {
-        setTimeRemaining((prev) => prev - 1)
-      }, 1000)
-    } else if (timerActive && timeRemaining === 0) {
-      setTimerActive(false)
-      toast.error("Game Over!", {
-        description: "The 70-minute countdown has ended.",
-      })
-    }
-
-    return () => {
-      if (interval) clearInterval(interval)
-    }
-  }, [timerActive, timeRemaining])
-
   const handleAdminConfirm = (password: string) => {
     if (password === "buk3") {
       setIsAdminMode(true)
@@ -57,6 +46,10 @@ export default function Shop() {
     } else {
       toast.error("Invalid Password")
     }
+  }
+
+  const handleTimeUpdate = (newTime: number) => {
+    setTimeRemaining(newTime) // Update timeRemaining and recalculate targetTime
   }
 
   return (
@@ -74,7 +67,7 @@ export default function Shop() {
           balance={balance}
           setBalance={(newBalance) => setBalance(parseFloat(newBalance.toFixed(2)))} // Round balance when updating
           timeRemaining={timeRemaining}
-          setTimeRemaining={setTimeRemaining}
+          setTimeRemaining={handleTimeUpdate} // Allow manual updates to timeRemaining
           timerActive={timerActive}
           setTimerActive={setTimerActive}
           inventory={inventory}
@@ -83,8 +76,10 @@ export default function Shop() {
           setIsAdminMode={setIsAdminMode}
           setOrderedItems={setOrderedItems} // Pass orderedItems setter
           setPurchaseHistory={() => {}} // No purchase history logic
-          setCurrentRound={setCurrentRound}
+          setCurrentRound={() => {}} // No current round logic
           setPurchasedInRound={() => {}} // No purchased items logic
+          setTargetTime={setTargetTime}
+          targetTime={targetTime} // Pass targetTime
         />
       )}
 
