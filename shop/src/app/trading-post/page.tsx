@@ -11,9 +11,10 @@ import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { categories } from "@/products/products"
 import { roundData, Round } from "@/products/round-data"
-import { MainNavBar } from "@/components/main-nav-bar" // Import the MainNavBar component
-import { handleBuy, handleOrder } from "@/utils/shop-actions" // Import the utility functions
-import { useTimer } from "@/utils/use-timer" // Import the useTimer hook
+import { MainNavBar } from "@/components/main-nav-bar"
+import { handleBuy, handleOrder } from "@/utils/shop-actions"
+import { useTimer } from "@/utils/use-timer"
+import { getCurrentPrice, getRemainingQuantity, getInventoryCount } from "@/utils/products-actions" // Import the reusable functions
 
 export default function TradingPost() {
   const [balance, setBalance] = useLocalStorage("shop-balance", 10000)
@@ -37,35 +38,17 @@ export default function TradingPost() {
 
   const allItems = Object.values(categories).flat()
 
-  const { timeRemaining, setTimeRemaining, currentRound } = useTimer({
+  const { isLoaded, timeRemaining, setTimeRemaining, currentRound } = useTimer({
     initialTargetTime: targetTime,
     timerActive,
-    totalRounds: 7, // Define 7 rounds
-    onTimerEnd: () => setTimerActive(false), // Stop the timer when it ends
-    updateTargetTime: setTargetTime, // Update targetTime in local storage
+    totalRounds: 7,
+    onTimerEnd: () => setTimerActive(false),
+    updateTargetTime: setTargetTime,
   })
 
   useEffect(() => {
     setRounds(roundData)
   }, [])
-
-  const getCurrentPrice = (itemId: string) => {
-    const currentRoundData = rounds.find((r) => r.number === currentRound)
-    if (!currentRoundData) return 0
-    return currentRoundData.prices[itemId] || 0
-  }
-
-  const getRemainingQuantity = (itemId: string) => {
-    const currentRoundData = rounds.find((r) => r.number === currentRound)
-    if (!currentRoundData) return 0
-    const maxPurchases = currentRoundData.maxPurchases[itemId] || 0
-    const alreadyPurchased = purchasedInRound[currentRound]?.[itemId] || 0
-    return Math.max(0, maxPurchases - alreadyPurchased)
-  }
-
-  const getInventoryCount = (itemId: string) => {
-    return inventory[itemId] || 0
-  }
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
@@ -82,19 +65,20 @@ export default function TradingPost() {
     }
   }
 
+  if (!isLoaded) {
+    return <div>Loading...</div>
+  }
+
   return (
     <div>
-      {/* Include the MainNavBar */}
       <MainNavBar
         balance={balance}
         orderedItemsCount={Object.values(orderedItems).reduce((a: number, b: number) => a + (b as number), 0)}
-        currentRound={currentRound} // Pass the current round to the MainNavBar
-        onAdminClick={() => setShowAdminModal(true)} // Pass the callback
+        currentRound={currentRound}
+        onAdminClick={() => setShowAdminModal(true)}
       />
 
       <div className="container mx-auto py-8 px-4">
-
-
         <Tabs defaultValue="wood" className="w-full">
           <TabsList className="grid grid-cols-4 mb-8">
             <TabsTrigger value="wood" className="flex items-center gap-2">
@@ -115,8 +99,8 @@ export default function TradingPost() {
             <TabsContent key={category} value={category} className="mt-0">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {items.map((item) => {
-                  const currentPrice = getCurrentPrice(item.id)
-                  const remainingQuantity = getRemainingQuantity(item.id)
+                  const currentPrice = getCurrentPrice(item.id, currentRound, rounds)
+                  const remainingQuantity = getRemainingQuantity(item.id, currentRound, rounds, purchasedInRound)
 
                   return (
                     <Card key={item.id} className="overflow-hidden">
@@ -149,12 +133,13 @@ export default function TradingPost() {
                       </CardContent>
                       <CardFooter className="p-4 flex flex-col gap-2">
                         <div className="flex justify-between items-center w-full">
-                          <span>In inventory: {getInventoryCount(item.id)}</span>
+                          <span>In inventory: {getInventoryCount(item.id, inventory)}</span>
                         </div>
                         <div className="flex gap-2 w-full">
-                            {currentRound === 1 && (
-                              <Button
-                                onClick={() => handleBuy(
+                          {currentRound === 1 && (
+                            <Button
+                              onClick={() =>
+                                handleBuy(
                                   item.id,
                                   item.name,
                                   currentPrice,
@@ -168,16 +153,26 @@ export default function TradingPost() {
                                   setPurchasedInRound,
                                   purchaseHistory,
                                   setPurchaseHistory,
-                                  getRemainingQuantity(item.id) // Pass the remaining quantity
-                                )}
-                                className="flex-1"
-                                disabled={getRemainingQuantity(item.id) <= 0 || currentPrice > balance || !timerActive}
-                              >
-                                Buy
-                              </Button>
-                            )}
+                                  getRemainingQuantity(item.id, currentRound, rounds, purchasedInRound),
+                                  1
+                                )
+                              }
+                              className="flex-1"
+                              disabled={remainingQuantity <= 0 || currentPrice > balance || !timerActive}
+                            >
+                              Buy
+                            </Button>
+                          )}
                           <Button
-                            onClick={() => handleOrder(item.id, item.name, currentPrice, { [item.id]: orderedItems[item.id] || 0 }, setOrderedItems)}
+                            onClick={() =>
+                              handleOrder(
+                                item.id,
+                                item.name,
+                                currentPrice,
+                                { [item.id]: orderedItems[item.id] || 0 },
+                                setOrderedItems
+                              )
+                            }
                             variant="secondary"
                             className="flex-1"
                           >

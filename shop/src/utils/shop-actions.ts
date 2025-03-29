@@ -23,24 +23,28 @@ export const handleBuy = (
     round: number
   }>,
   setPurchaseHistory: (value: typeof purchaseHistory) => void,
-  remainingQuantity: number
+  remainingQuantity: number,
+  quantity: number
 ) => {
-  if (currentRound !== 1) {
-    toast.error("You can only buy products in the first round.")
+  if (isNaN(quantity) || quantity <= 0) {
+    toast.error("Invalid quantity. Please enter a positive number.")
     return
   }
 
-  if (balance >= price && remainingQuantity > 0) {
-    setBalance(parseFloat((balance - price).toFixed(2)))
+  const maxAffordableQuantity = Math.floor(balance / price)
+  const purchasableQuantity = Math.min(quantity, remainingQuantity, maxAffordableQuantity)
+
+  if (purchasableQuantity > 0) {
+    setBalance(parseFloat((balance - price * purchasableQuantity).toFixed(2)))
     setInventory({
       ...inventory,
-      [itemId]: (inventory[itemId] || 0) + 1,
+      [itemId]: (inventory[itemId] || 0) + purchasableQuantity,
     })
     setPurchasedInRound({
       ...purchasedInRound,
       [currentRound]: {
         ...purchasedInRound[currentRound],
-        [itemId]: (purchasedInRound[currentRound]?.[itemId] || 0) + 1,
+        [itemId]: (purchasedInRound[currentRound]?.[itemId] || 0) + purchasableQuantity,
       },
     })
     setPurchaseHistory([
@@ -50,13 +54,13 @@ export const handleBuy = (
         itemId,
         itemName,
         price,
-        quantity: 1,
+        quantity: purchasableQuantity,
         date: new Date().toISOString(),
         category,
         round: currentRound,
       },
     ])
-    toast.success(`You bought 1 ${itemName} for ${price} PLN.`)
+    toast.success(`You bought ${purchasableQuantity} ${itemName}(s) for ${price * purchasableQuantity} PLN.`)
   } else {
     toast.error("You don't have enough balance or the item is out of stock.")
   }

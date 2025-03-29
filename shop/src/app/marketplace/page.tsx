@@ -9,7 +9,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input"
 import { useLocalStorage } from "@/hooks/use-local-storage"
 import { MainNavBar } from "@/components/main-nav-bar"
-import { useTimer } from "@/utils/use-timer" // Adjust the path based on your project structure
+import { useTimer } from "@/utils/use-timer"
+import { marketplaceProducts } from "@/products/marketplace-products" // Import products
 
 export default function Marketplace() {
   const [balance, setBalance] = useLocalStorage("shop-balance", 10000)
@@ -26,71 +27,10 @@ export default function Marketplace() {
     updateTargetTime: setTargetTime, // Update targetTime in local storage
   })
 
-  // Marketplace listings
-  const listings = [
-    {
-      id: "wood1",
-      title: "Drewno Kominkowe Opałowe",
-      price: 250,
-      location: "Wołomin",
-      date: "Odświeżono dnia 22 marca 2025",
-      image: "/placeholder.svg?height=200&width=200",
-      featured: true,
-      quantity: Math.floor(Math.random() * 46) + 5, // Random between 5-50
-    },
-    {
-      id: "wood2",
-      title: "Drewno opałowe, kominkowe - wałki",
-      price: 160,
-      location: "Piła",
-      date: "Odświeżono dnia 21 marca 2025",
-      image: "/placeholder.svg?height=200&width=200",
-      featured: true,
-      quantity: Math.floor(Math.random() * 46) + 5,
-    },
-    {
-      id: "wood3",
-      title: "Drewno sezonowane kominkowe opałowe z dowozem",
-      price: 185,
-      location: "Ostrów Wielkopolski",
-      date: "Odświeżono dnia 22 marca 2025",
-      image: "/placeholder.svg?height=200&width=200",
-      featured: true,
-      quantity: Math.floor(Math.random() * 46) + 5,
-    },
-    {
-      id: "wood4",
-      title: "Okazja? Drewno - świerk, brzoza",
-      price: 800,
-      location: "Inwałd",
-      date: "Dzisiaj o 07:56",
-      image: "/placeholder.svg?height=200&width=200",
-      featured: false,
-      quantity: Math.floor(Math.random() * 46) + 5,
-    },
-    {
-      id: "wood5",
-      title: "Drewno orzech włoski",
-      price: 650,
-      location: "Marianka",
-      date: "Dzisiaj o 12:52",
-      image: "/placeholder.svg?height=200&width=200",
-      featured: false,
-      quantity: Math.floor(Math.random() * 46) + 5,
-    },
-    {
-      id: "wood6",
-      title: "Drewno bukowe premium",
-      price: 320,
-      location: "Kraków",
-      date: "Odświeżono dnia 20 marca 2025",
-      image: "/placeholder.svg?height=200&width=200",
-      featured: false,
-      quantity: Math.floor(Math.random() * 46) + 5,
-    },
-  ]
-
-  const filteredListings = listings.filter((listing) => listing.title.toLowerCase().includes(searchQuery.toLowerCase()))
+  // Filtered listings based on search query
+  const filteredListings = marketplaceProducts.filter((listing) =>
+    listing.title.toLowerCase().includes(searchQuery.toLowerCase())
+  )
 
   const addToCart = (itemId: string) => {
     setOrderedItems({
@@ -100,7 +40,7 @@ export default function Marketplace() {
   }
 
   const buyItem = (itemId: string, price: number) => {
-    const item = listings.find((item) => item.id === itemId)
+    const item = marketplaceProducts.find((item) => item.id === itemId)
     if (item && balance >= price) {
       setBalance(parseFloat((balance - price).toFixed(2)))
     }
@@ -113,14 +53,14 @@ export default function Marketplace() {
         orderedItemsCount={Object.values(orderedItems).reduce((a: number, b: number) => a + (b as number), 0)}
         currentRound={currentRound} // Pass the current round to the MainNavBar
         onAdminClick={() => {
-          console.log("Admin button clicked");
+          console.log("Admin button clicked")
         }}
       />
 
       <div className="container mx-auto py-8 px-4">
         <div className="bg-white p-4 rounded-lg shadow mb-6">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-2xl font-bold">Znaleźliśmy ponad {listings.length} ogłoszeń</h1>
+            <h1 className="text-2xl font-bold">Znaleźliśmy ponad {marketplaceProducts.length} ogłoszeń</h1>
             <Button className="bg-teal-500 hover:bg-teal-600">Dodaj ogłoszenie</Button>
           </div>
 
