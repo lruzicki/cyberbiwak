@@ -11,10 +11,27 @@ import { useLocalStorage } from "@/hooks/use-local-storage"
 import { MainNavBar } from "@/components/main-nav-bar"
 import { useTimer } from "@/utils/use-timer"
 import { categories } from "@/products/products" // Import categories from products.ts
+import { getCurrentPrice, getRemainingQuantity, getInventoryCount } from "@/utils/products-actions" // Import reusable functions
+import { handleBuy, handleOrder } from "@/utils/shop-actions" // Import buy and order handlers
 
 export default function Nieruchomosci() {
   const [balance, setBalance] = useLocalStorage("shop-balance", 10000)
+  const [inventory, setInventory] = useLocalStorage<Record<string, number>>("shop-inventory", {})
   const [orderedItems, setOrderedItems] = useLocalStorage<Record<string, number>>("shop-ordered-items", {})
+  const [purchaseHistory, setPurchaseHistory] = useLocalStorage<Array<{
+    id: number
+    itemId: string
+    itemName: string
+    price: number
+    quantity: number
+    date: string
+    category: string
+    round: number
+  }>>("shop-purchase-history", [])
+  const [purchasedInRound, setPurchasedInRound] = useLocalStorage<Record<number, Record<string, number>>>(
+    "purchased-in-round",
+    {}
+  )
   const [searchQuery, setSearchQuery] = useState("")
   const [propertyType, setPropertyType] = useState("Kupię")
   const [propertyCategory, setPropertyCategory] = useState("Działka")
@@ -36,17 +53,6 @@ export default function Nieruchomosci() {
       property.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       property.category.toLowerCase().includes(searchQuery.toLowerCase())
   )
-
-  const addToCart = (itemId: string) => {
-    setOrderedItems({
-      ...orderedItems,
-      [itemId]: (orderedItems[itemId] || 0) + 1,
-    })
-  }
-
-  const buyItem = (itemId: string) => {
-    console.log(`Buying item with ID: ${itemId}`)
-  }
 
   const toggleFavorite = (itemId: string) => {
     console.log("Toggle favorite for:", itemId)
@@ -144,44 +150,79 @@ export default function Nieruchomosci() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProperties.map((property) => (
-            <div key={property.id} className="bg-white rounded-md overflow-hidden shadow-sm">
-              <div className="relative">
-                <Image
-                  src={property.image || "/placeholder.svg"}
-                  alt={property.name}
-                  width={400}
-                  height={300}
-                  className="w-full h-48 object-cover"
-                />
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute top-2 right-2 bg-white/80 rounded-full h-8 w-8"
-                  onClick={() => toggleFavorite(property.id)}
-                >
-                  <Heart className="h-5 w-5 text-gray-500" />
-                </Button>
-              </div>
-              <div className="p-4">
-                <div className="text-sm text-gray-500 mb-1">{property.category}</div>
-                <h3 className="font-medium mb-2">{property.name}</h3>
-                <div className="flex justify-between items-end mb-4">
-                  <div>
-                    <div className="font-bold text-lg">Cena: Brak</div>
+          {filteredProperties.map((property) => {
+            const currentPrice = getCurrentPrice(property.id, currentRound)
+            const remainingQuantity = getRemainingQuantity(property.id, currentRound, purchasedInRound)
+
+            return (
+              <div key={property.id} className="bg-white rounded-md overflow-hidden shadow-sm">
+                <div className="relative">
+                  <Image
+                    src={property.image || "/placeholder.svg"}
+                    alt={property.name}
+                    width={400}
+                    height={300}
+                    className="w-full h-48 object-cover"
+                  />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-2 right-2 bg-white/80 rounded-full h-8 w-8"
+                    onClick={() => toggleFavorite(property.id)}
+                  >
+                    <Heart className="h-5 w-5 text-gray-500" />
+                  </Button>
+                </div>
+                <div className="p-4">
+                  <div className="text-sm text-gray-500 mb-1">{property.category}</div>
+                  <h3 className="font-medium mb-2">{property.name}</h3>
+                  <div className="flex justify-between items-end mb-4">
+                    <div>
+                      <div className="font-bold text-lg">Cena: {currentPrice.toFixed(2)} PLN</div>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    {currentRound === 1 && (
+                      <Button
+                        onClick={() =>
+                          handleBuy(
+                            property.id,
+                            property.name,
+                            currentPrice,
+                            "ground",
+                            currentRound,
+                            balance,
+                            setBalance,
+                            inventory,
+                            setInventory,
+                            purchasedInRound,
+                            setPurchasedInRound,
+                            purchaseHistory,
+                            setPurchaseHistory,
+                            remainingQuantity,
+                            -1
+                          )
+                        }
+                        variant="outline"
+                        className="flex-1"
+                        disabled={remainingQuantity <= 0 || currentPrice > balance || !timerActive}
+                      >
+                        Kup
+                      </Button>
+                    )}
+                    <Button
+                      onClick={() =>
+                        handleOrder(property.id, property.name, orderedItems, setOrderedItems)
+                      }
+                      className="flex-1 bg-orange-500 hover:bg-orange-600"
+                    >
+                      Zamów {orderedItems[property.id] ? `(${orderedItems[property.id]})` : ""}
+                    </Button>
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <Button onClick={() => addToCart(property.id)} variant="outline" className="flex-1">
-                    Dodaj do koszyka
-                  </Button>
-                  <Button onClick={() => buyItem(property.id)} className="flex-1 bg-orange-500 hover:bg-orange-600">
-                    Kup teraz
-                  </Button>
-                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </div>
     </div>

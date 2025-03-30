@@ -3,55 +3,64 @@
 import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { ShoppingCart, Heart, MessageSquare, Bell, ChevronDown, Truck, Shield } from "lucide-react"
+import { ShoppingCart, Heart, MessageSquare, Bell, ChevronDown, Truck } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { Card, CardFooter } from "@/components/ui/card"
+import { Card, CardFooter, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card"
 import { useLocalStorage } from "@/hooks/use-local-storage"
 import { MainNavBar } from "@/components/main-nav-bar"
-import { allegroProducts, allegroCategories } from "@/products/allegro-products"
-import { useTimer } from "@/utils/use-timer" // Adjust the path based on your project structure
+import { categories } from "@/products/products" // Use categories from products.ts
+import { useTimer } from "@/utils/use-timer"
+import { getCurrentPrice, getRemainingQuantity } from "@/utils/products-actions"
+import { handleBuy, handleOrder } from "@/utils/shop-actions"
 
 export default function Allegro() {
   const [balance, setBalance] = useLocalStorage("shop-balance", 10000)
+  const [inventory, setInventory] = useLocalStorage<Record<string, number>>("shop-inventory", {})
   const [orderedItems, setOrderedItems] = useLocalStorage<Record<string, number>>("shop-ordered-items", {})
+  const [purchaseHistory, setPurchaseHistory] = useLocalStorage<Array<{
+    id: number
+    itemId: string
+    itemName: string
+    price: number
+    quantity: number
+    date: string
+    category: string
+    round: number
+  }>>("shop-purchase-history", [])
+  const [purchasedInRound, setPurchasedInRound] = useLocalStorage<Record<number, Record<string, number>>>(
+    "purchased-in-round",
+    {}
+  )
   const [searchQuery, setSearchQuery] = useState("")
-  const [targetTime, setTargetTime] = useLocalStorage("shop-target-time", Date.now() + 70 * 60 * 1000) // Use targetTime from local storage
+  const [selectedCategory, setSelectedCategory] = useState<string>("all") // Track selected category
+  const [targetTime, setTargetTime] = useLocalStorage("shop-target-time", Date.now() + 70 * 60 * 1000)
   const [timerActive, setTimerActive] = useLocalStorage("shop-timer-active", false)
 
-  const { timeRemaining, setTimeRemaining, currentRound } = useTimer({
+  const { currentRound } = useTimer({
     initialTargetTime: targetTime,
     timerActive,
-    totalRounds: 7, // Define 7 rounds
-    onTimerEnd: () => setTimerActive(false), // Stop the timer when it ends
-    updateTargetTime: setTargetTime, // Update targetTime in local storage
+    totalRounds: 7,
+    onTimerEnd: () => setTimerActive(false),
+    updateTargetTime: setTargetTime,
   })
 
-  const filteredProducts = allegroProducts.filter((product) => product.name.toLowerCase().includes(searchQuery.toLowerCase()))
-
-  const addToCart = (itemId: string) => {
-    setOrderedItems({
-      ...orderedItems,
-      [itemId]: (orderedItems[itemId] || 0) + 1,
-    })
-  }
-
-  const buyItem = (itemId: string, price: number) => {
-    const item = allegroProducts.find((item) => item.id === itemId)
-    if (item && balance >= price) {
-      setBalance(parseFloat((balance - price).toFixed(2)))
-    }
-  }
+  // Filter products based on the selected category and search query
+  const filteredProducts = Object.entries(categories)
+    .filter(([categoryKey]) => selectedCategory === "all" || categoryKey === selectedCategory)
+    .flatMap(([, items]) =>
+      items.filter((product) => product.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    )
 
   return (
     <div className="min-h-screen bg-gray-100">
       <MainNavBar
         balance={balance}
-        orderedItemsCount={Object.values(orderedItems as Record<string, number>).reduce((a, b) => a + b, 0)}
-        currentRound={currentRound} // Pass the current round to the MainNavBar
+        orderedItemsCount={Object.values(orderedItems).reduce((a: number, b: number) => a + (b as number), 0)}
+        currentRound={currentRound}
         onAdminClick={() => {
-          console.log("Admin button clicked");
+          console.log("Admin button clicked")
         }}
       />
 
@@ -114,27 +123,6 @@ export default function Allegro() {
               </div>
             </div>
           </div>
-
-          {/* Categories */}
-          <div className="flex items-center space-x-6 py-2 text-sm">
-            <div className="flex items-center font-medium">
-              <span>Kategorie</span>
-              <ChevronDown className="h-4 w-4 ml-1" />
-            </div>
-            <Link href="#" className="flex items-center text-gray-700">
-              <span>Strefa Okazji</span>
-            </Link>
-            <Link href="#" className="flex items-center text-gray-700">
-              <Shield className="h-4 w-4 mr-1" />
-              <span>Allegro Protect</span>
-            </Link>
-            <Link href="#" className="flex items-center text-gray-700">
-              <span>Gwarancja najniższej ceny</span>
-            </Link>
-            <Link href="#" className="flex items-center text-gray-700">
-              <span>Sprzedawaj na Allegro</span>
-            </Link>
-          </div>
         </div>
       </header>
 
@@ -165,38 +153,51 @@ export default function Allegro() {
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Categories */}
+      <div className="container mx-auto py-8 px-4">
+        {/* Categories Section */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-8">
-          {allegroCategories.map((category) => (
-            <Link href="#" key={category.id} className="flex flex-col items-center text-center">
+          <div
+            className={`flex flex-col items-center text-center cursor-pointer ${
+              selectedCategory === "all" ? "text-orange-500 font-bold" : "text-gray-700"
+            }`}
+            onClick={() => setSelectedCategory("all")}
+          >
+            <div className="bg-white p-4 rounded-lg shadow-sm mb-2 w-full">
+              <Image src="/placeholder.svg" alt="All Categories" width={80} height={80} className="mx-auto" />
+            </div>
+            <span className="text-xs font-bold">Wszystkie</span>
+          </div>
+          {Object.entries(categories).map(([categoryKey]) => (
+            <div
+              key={categoryKey}
+              className={`flex flex-col items-center text-center cursor-pointer ${
+                selectedCategory === categoryKey ? "text-orange-500 font-bold" : "text-gray-700"
+              }`}
+              onClick={() => setSelectedCategory(categoryKey)}
+            >
               <div className="bg-white p-4 rounded-lg shadow-sm mb-2 w-full">
-                <Image
-                  src={category.icon || "/placeholder.svg"}
-                  alt={category.name}
-                  width={80}
-                  height={80}
-                  className="mx-auto"
-                />
+                <Image src="/placeholder.svg" alt={categoryKey} width={80} height={80} className="mx-auto" />
               </div>
-              <span className="text-xs">{category.name}</span>
-            </Link>
+              <span className="text-xs font-bold">{categoryKey}</span>
+            </div>
           ))}
         </div>
 
-        {/* Spring deals section */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold">Jak niskie ceny, to czas na wiosenne zakupy</h2>
-            <Link href="#" className="text-blue-500 text-sm">
-              Zobacz więcej
-            </Link>
-          </div>
+        {/* Products Section */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          {filteredProducts.map((product) => {
+            const currentPrice = getCurrentPrice(product.id, currentRound)
+            const remainingQuantity = getRemainingQuantity(product.id, currentRound, purchasedInRound)
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {filteredProducts.map((product) => (
+            return (
               <Card key={product.id} className="overflow-hidden">
-                <div className="p-4">
+                <CardHeader className="p-4 pb-2">
+                  <CardTitle className="text-lg">{product.name}</CardTitle>
+                  <CardDescription>Price: {currentPrice.toFixed(2)} PLN</CardDescription>
+                </CardHeader>
+                <CardContent className="p-4 pt-0 pb-2">
                   <div className="aspect-square relative mb-2">
                     <Image
                       src={product.image || "/placeholder.svg"}
@@ -205,38 +206,50 @@ export default function Allegro() {
                       className="object-contain"
                     />
                   </div>
-                  <div className="mb-2">
-                    <div className="flex items-baseline">
-                      <span className="text-xl font-bold">{product.price.toFixed(2)}</span>
-                      <span className="text-xs ml-1">PLN</span>
-                    </div>
-                    <div className="text-xs text-green-600">{product.guarantee}</div>
-                  </div>
-                  <div className="h-12 overflow-hidden mb-2">
-                    <h3 className="text-sm leading-tight">{product.name}</h3>
-                  </div>
-                  <div className="flex items-center mb-2">
-                    {product.smart && <Badge className="bg-blue-900 text-white text-xs">SMART</Badge>}
-                  </div>
-                  <div className="text-xs mb-2">Dostępna ilość: {product.quantity}</div>
-                  <div className="text-xs text-gray-500 mb-2">{product.delivery}</div>
-                </div>
+                  <div className="text-xs mb-2">Dostępna ilość: {remainingQuantity}</div>
+                </CardContent>
                 <CardFooter className="p-4 pt-0 flex flex-col gap-2">
-                  <Button onClick={() => addToCart(product.id)} variant="outline" className="w-full text-xs">
-                    <ShoppingCart className="h-3 w-3 mr-1" />
-                    Dodaj do koszyka
-                  </Button>
+                    {currentRound === 1 && (
+                    <Button
+                      onClick={() =>
+                      handleBuy(
+                        product.id,
+                        product.name,
+                        currentPrice,
+                        selectedCategory,
+                        currentRound,
+                        balance,
+                        setBalance,
+                        inventory,
+                        setInventory,
+                        purchasedInRound,
+                        setPurchasedInRound,
+                        purchaseHistory,
+                        setPurchaseHistory,
+                        remainingQuantity,
+                        -1
+                      )
+                      }
+                      className="w-full bg-orange-500 hover:bg-orange-600 text-xs"
+                      disabled={remainingQuantity <= 0 || currentPrice > balance || !timerActive}
+                    >
+                      Kup
+                    </Button>
+                    )}
                   <Button
-                    onClick={() => buyItem(product.id, product.price)}
-                    className="w-full bg-orange-500 hover:bg-orange-600 text-xs"
-                    disabled={balance < product.price}
+                    onClick={() =>
+                      handleOrder(product.id, product.name, orderedItems, setOrderedItems)
+                    }
+                    variant="outline"
+                    className="w-full text-xs"
                   >
-                    Kup teraz
+                    <ShoppingCart className="h-3 w-3 mr-1" />
+                    Zamów {orderedItems[product.id] ? `(${orderedItems[product.id]})` : ""}
                   </Button>
                 </CardFooter>
               </Card>
-            ))}
-          </div>
+            )
+          })}
         </div>
       </div>
     </div>
