@@ -3,190 +3,54 @@
 import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { Search, ShoppingCart, Truck, Building, Store, Info, FileText } from "lucide-react"
+import { Search, ShoppingCart, Truck, Building, Store, Info } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Card, CardFooter, CardHeader, CardContent, CardTitle, CardDescription } from "@/components/ui/card"
 import { useLocalStorage } from "@/hooks/use-local-storage"
 import { MainNavBar } from "@/components/main-nav-bar"
-import { useTimer } from "@/utils/use-timer" // Adjust the path based on your project structure
+import { useTimer } from "@/utils/use-timer"
+import { categories } from "@/products/products" // Import products from products.ts
+import { getCurrentPrice, getRemainingQuantity, getInventoryCount } from "@/utils/products-actions" // Import reusable functions
+import { handleBuy, handleOrder } from "@/utils/shop-actions" // Import buy and order handlers
 
 export default function Makro() {
   const [balance, setBalance] = useLocalStorage("shop-balance", 10000)
+  const [inventory, setInventory] = useLocalStorage<Record<string, number>>("shop-inventory", {})
   const [orderedItems, setOrderedItems] = useLocalStorage<Record<string, number>>("shop-ordered-items", {})
+  const [purchaseHistory, setPurchaseHistory] = useLocalStorage<Array<{
+    id: number
+    itemId: string
+    itemName: string
+    price: number
+    quantity: number
+    date: string
+    category: string
+    round: number
+  }>>("shop-purchase-history", [])
+  const [purchasedInRound, setPurchasedInRound] = useLocalStorage<Record<number, Record<string, number>>>(
+    "purchased-in-round",
+    {}
+  )
   const [searchQuery, setSearchQuery] = useState("")
-  const [targetTime, setTargetTime] = useLocalStorage("shop-target-time", Date.now() + 70 * 60 * 1000) // Use targetTime from local storage
+  const [targetTime, setTargetTime] = useLocalStorage("shop-target-time", Date.now() + 70 * 60 * 1000)
   const [timerActive, setTimerActive] = useLocalStorage("shop-timer-active", false)
 
-  const { timeRemaining, setTimeRemaining, currentRound } = useTimer({
+  const { isLoaded, timeRemaining, setTimeRemaining, currentRound } = useTimer({
     initialTargetTime: targetTime,
     timerActive,
-    totalRounds: 7, // Define 7 rounds
-    onTimerEnd: () => setTimerActive(false), // Stop the timer when it ends
-    updateTargetTime: setTargetTime, // Update targetTime in local storage
+    totalRounds: 7,
+    onTimerEnd: () => setTimerActive(false),
+    updateTargetTime: setTargetTime,
   })
 
-  // Catalogs/Flyers
-  const catalogs = [
-    {
-      id: "catalog1",
-      title: "Oferta dla gastronomii",
-      dateRange: "18.03.2025 - 31.03.2025",
-      image: "/placeholder.svg?height=300&width=250",
-      price: 0, // Free catalog
-      quantity: 100,
-      type: "flyer",
-    },
-    {
-      id: "catalog2",
-      title: "Kupujesz więcej płacisz mniej",
-      dateRange: "18.03.2025 - 14.04.2025",
-      image: "/placeholder.svg?height=300&width=250",
-      price: 0,
-      quantity: 100,
-      type: "flyer",
-    },
-    {
-      id: "catalog3",
-      title: "Ulotka udo z kurczaka",
-      dateRange: "01.03.2025 - 31.03.2025",
-      image: "/placeholder.svg?height=300&width=250",
-      price: 0,
-      quantity: 100,
-      type: "flyer",
-    },
-    {
-      id: "catalog4",
-      title: "Meble i grille - katalog produktów dla profesjonalnej Gastronomii 2025",
-      dateRange: "01.01.2025 - 31.01.2026",
-      image: "/placeholder.svg?height=300&width=250",
-      price: 0,
-      quantity: 100,
-      type: "catalog",
-    },
-    {
-      id: "catalog5",
-      title: "Targ MAKRO - oferta świeża w super cenach!",
-      dateRange: "Aktualna oferta",
-      image: "/placeholder.svg?height=300&width=250",
-      price: 0,
-      quantity: 100,
-      type: "flyer",
-    },
-    {
-      id: "catalog6",
-      title: "Katalog produktów dla profesjonalnej Gastronomii 2025",
-      dateRange: "Ważne do 31.01.2026",
-      image: "/placeholder.svg?height=300&width=250",
-      price: 0,
-      quantity: 100,
-      type: "catalog",
-    },
-    {
-      id: "catalog7",
-      title: "Katalog Smart Chef",
-      dateRange: "Aktualna oferta",
-      image: "/placeholder.svg?height=300&width=250",
-      price: 0,
-      quantity: 100,
-      type: "catalog",
-    },
-    {
-      id: "catalog8",
-      title: "Katalog produktów marek własnych dla profesjonalnej Gastronomii 2025",
-      dateRange: "Ważne do 28.02.2026",
-      image: "/placeholder.svg?height=300&width=250",
-      price: 0,
-      quantity: 100,
-      type: "catalog",
-    },
-  ]
+  // Filter products from the "gastronomy" category
+  const gastronomyProducts = categories.food.filter((product) =>
+    product.name.toLowerCase().includes(searchQuery.toLowerCase())
+  )
 
-  // Products
-  const products = [
-    {
-      id: "product1",
-      name: "Pomidory w puszce San Marzano",
-      price: 14.99,
-      image: "/placeholder.svg?height=200&width=200",
-      quantity: Math.floor(Math.random() * 46) + 5,
-      category: "gastronomy",
-    },
-    {
-      id: "product2",
-      name: "Olej rzepakowy 5L",
-      price: 58.99,
-      image: "/placeholder.svg?height=200&width=200",
-      quantity: Math.floor(Math.random() * 46) + 5,
-      category: "gastronomy",
-    },
-    {
-      id: "product3",
-      name: "Mąka pszenna typ 500 25kg",
-      price: 89.99,
-      image: "/placeholder.svg?height=200&width=200",
-      quantity: Math.floor(Math.random() * 46) + 5,
-      category: "gastronomy",
-    },
-    {
-      id: "product4",
-      name: "Udo z kurczaka 5kg",
-      price: 65.99,
-      image: "/placeholder.svg?height=200&width=200",
-      quantity: Math.floor(Math.random() * 46) + 5,
-      category: "gastronomy",
-    },
-    {
-      id: "product5",
-      name: "Schab wieprzowy b/k 1kg",
-      price: 18.99,
-      image: "/placeholder.svg?height=200&width=200",
-      quantity: Math.floor(Math.random() * 46) + 5,
-      category: "gastronomy",
-    },
-    {
-      id: "product6",
-      name: "Filet z kurczaka 1kg",
-      price: 12.99,
-      image: "/placeholder.svg?height=200&width=200",
-      quantity: Math.floor(Math.random() * 46) + 5,
-      category: "gastronomy",
-    },
-    {
-      id: "product7",
-      name: "Wołowina antrykot 1kg",
-      price: 36.99,
-      image: "/placeholder.svg?height=200&width=200",
-      quantity: Math.floor(Math.random() * 46) + 5,
-      category: "gastronomy",
-    },
-    {
-      id: "product8",
-      name: "Filet z indyka 1kg",
-      price: 42.99,
-      image: "/placeholder.svg?height=200&width=200",
-      quantity: Math.floor(Math.random() * 46) + 5,
-      category: "gastronomy",
-    },
-  ]
-
-  const filteredCatalogs = catalogs.filter((catalog) => catalog.title.toLowerCase().includes(searchQuery.toLowerCase()))
-
-  const filteredProducts = products.filter((product) => product.name.toLowerCase().includes(searchQuery.toLowerCase()))
-
-  const addToCart = (itemId: string) => {
-    setOrderedItems({
-      ...orderedItems,
-      [itemId]: (orderedItems[itemId] || 0) + 1,
-    })
-  }
-
-  const buyItem = (itemId: string, price: number) => {
-    const item = [...products, ...catalogs].find((item) => item.id === itemId)
-    if (item && balance >= price) {
-      setBalance(parseFloat((balance - price).toFixed(2)))
-    }
+  if (!isLoaded) {
+    return <div>Loading...</div>
   }
 
   return (
@@ -194,9 +58,9 @@ export default function Makro() {
       <MainNavBar
         balance={balance}
         orderedItemsCount={Object.values(orderedItems).reduce((a: number, b: number) => a + (b as number), 0)}
-        currentRound={currentRound} // Pass the current round to the MainNavBar
+        currentRound={currentRound}
         onAdminClick={() => {
-          console.log("Admin button clicked");
+          console.log("Admin button clicked")
         }}
       />
 
@@ -249,229 +113,88 @@ export default function Makro() {
         </div>
       </header>
 
-      {/* Navigation */}
-      <div className="bg-white border-b">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center space-x-6 py-3 text-sm">
-            <Link href="#" className="flex items-center text-blue-900 font-medium">
-              <Truck className="h-4 w-4 mr-1" />
-              <span>Zamów z dostawą</span>
-            </Link>
-            <Link href="#" className="flex items-center text-blue-900 font-medium">
-              <FileText className="h-4 w-4 mr-1" />
-              <span>Gazetki i promocje</span>
-            </Link>
-          </div>
-        </div>
-      </div>
-
+      {/* Products section */}
       <div className="container mx-auto py-8 px-4">
-        {/* Breadcrumbs */}
-        <div className="mb-4">
-          <Link href="#" className="text-blue-900 text-sm hover:underline">
-            Gazetki i promocje
-          </Link>
-        </div>
-
-        {/* Main content */}
-        <div className="bg-white p-6 rounded-md shadow-sm mb-8">
-          <h1 className="text-2xl font-bold text-center text-blue-900 mb-6">GAZETKI I PROMOCJE DLA GASTRONOMII</h1>
-
-          <Tabs defaultValue="halls">
-            <TabsList className="mb-6 border-b w-full justify-start rounded-none bg-transparent h-auto p-0">
-              <TabsTrigger
-                value="halls"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-blue-900 data-[state=active]:bg-transparent text-gray-700 data-[state=active]:text-blue-900 pb-2 px-4"
-              >
-                W halach (10)
-              </TabsTrigger>
-              <TabsTrigger
-                value="delivery"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-blue-900 data-[state=active]:bg-transparent text-gray-700 data-[state=active]:text-blue-900 pb-2 px-4"
-              >
-                W dostawie (7)
-              </TabsTrigger>
-              <TabsTrigger
-                value="flyers"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-blue-900 data-[state=active]:bg-transparent text-gray-700 data-[state=active]:text-blue-900 pb-2 px-4"
-              >
-                Ulotki (10)
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="halls" className="mt-0">
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {filteredCatalogs.map((catalog) => (
-                  <Card key={catalog.id} className="overflow-hidden border-none shadow-md">
-                    <div className="relative">
-                      <Image
-                        src={catalog.image || "/placeholder.svg"}
-                        alt={catalog.title}
-                        width={250}
-                        height={300}
-                        className="w-full h-64 object-cover"
-                      />
-                    </div>
-                    <CardHeader className="p-4 pb-2">
-                      <CardTitle className="text-base font-medium">{catalog.title}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-4 pt-0 pb-2">
-                      <p className="text-sm text-gray-500">{catalog.dateRange}</p>
-                      <p className="text-sm mt-2">Dostępna ilość: {catalog.quantity}</p>
-                    </CardContent>
-                    <CardFooter className="p-4 flex gap-2">
-                      <Button
-                        onClick={() => addToCart(catalog.id)}
-                        variant="outline"
-                        className="flex-1 border-blue-900 text-blue-900 hover:bg-blue-50"
-                      >
-                        <ShoppingCart className="h-4 w-4 mr-2" />
-                        Dodaj do koszyka
-                      </Button>
-                      <Button
-                        onClick={() => buyItem(catalog.id, catalog.price)}
-                        className="flex-1 bg-blue-900 hover:bg-blue-800"
-                      >
-                        Pobierz
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                ))}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="delivery" className="mt-0">
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {filteredCatalogs
-                  .filter((c) => c.type === "flyer")
-                  .map((catalog) => (
-                    <Card key={catalog.id} className="overflow-hidden border-none shadow-md">
-                      <div className="relative">
-                        <Image
-                          src={catalog.image || "/placeholder.svg"}
-                          alt={catalog.title}
-                          width={250}
-                          height={300}
-                          className="w-full h-64 object-cover"
-                        />
-                      </div>
-                      <CardHeader className="p-4 pb-2">
-                        <CardTitle className="text-base font-medium">{catalog.title}</CardTitle>
-                      </CardHeader>
-                      <CardContent className="p-4 pt-0 pb-2">
-                        <p className="text-sm text-gray-500">{catalog.dateRange}</p>
-                        <p className="text-sm mt-2">Dostępna ilość: {catalog.quantity}</p>
-                      </CardContent>
-                      <CardFooter className="p-4 flex gap-2">
-                        <Button
-                          onClick={() => addToCart(catalog.id)}
-                          variant="outline"
-                          className="flex-1 border-blue-900 text-blue-900 hover:bg-blue-50"
-                        >
-                          <ShoppingCart className="h-4 w-4 mr-2" />
-                          Dodaj do koszyka
-                        </Button>
-                        <Button
-                          onClick={() => buyItem(catalog.id, catalog.price)}
-                          className="flex-1 bg-blue-900 hover:bg-blue-800"
-                        >
-                          Pobierz
-                        </Button>
-                      </CardFooter>
-                    </Card>
-                  ))}
-              </div>
-            </TabsContent>
-
-            <TabsContent value="flyers" className="mt-0">
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {filteredCatalogs
-                  .filter((c) => c.type === "flyer")
-                  .map((catalog) => (
-                    <Card key={catalog.id} className="overflow-hidden border-none shadow-md">
-                      <div className="relative">
-                        <Image
-                          src={catalog.image || "/placeholder.svg"}
-                          alt={catalog.title}
-                          width={250}
-                          height={300}
-                          className="w-full h-64 object-cover"
-                        />
-                      </div>
-                      <CardHeader className="p-4 pb-2">
-                        <CardTitle className="text-base font-medium">{catalog.title}</CardTitle>
-                      </CardHeader>
-                      <CardContent className="p-4 pt-0 pb-2">
-                        <p className="text-sm text-gray-500">{catalog.dateRange}</p>
-                        <p className="text-sm mt-2">Dostępna ilość: {catalog.quantity}</p>
-                      </CardContent>
-                      <CardFooter className="p-4 flex gap-2">
-                        <Button
-                          onClick={() => addToCart(catalog.id)}
-                          variant="outline"
-                          className="flex-1 border-blue-900 text-blue-900 hover:bg-blue-50"
-                        >
-                          <ShoppingCart className="h-4 w-4 mr-2" />
-                          Dodaj do koszyka
-                        </Button>
-                        <Button
-                          onClick={() => buyItem(catalog.id, catalog.price)}
-                          className="flex-1 bg-blue-900 hover:bg-blue-800"
-                        >
-                          Pobierz
-                        </Button>
-                      </CardFooter>
-                    </Card>
-                  ))}
-              </div>
-            </TabsContent>
-          </Tabs>
-        </div>
-
-        {/* Products section */}
         <div className="bg-white p-6 rounded-md shadow-sm">
           <h2 className="text-xl font-bold text-blue-900 mb-6">Produkty dla gastronomii</h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {filteredProducts.map((product) => (
-              <Card key={product.id} className="overflow-hidden border-none shadow-md">
-                <div className="p-4">
-                  <div className="aspect-square relative mb-4">
-                    <Image
-                      src={product.image || "/placeholder.svg"}
-                      alt={product.name}
-                      fill
-                      className="object-contain"
-                    />
-                  </div>
-                  <div className="mb-2">
-                    <h3 className="font-medium">{product.name}</h3>
-                    <div className="flex items-baseline mt-1">
-                      <span className="text-xl font-bold text-red-600">{product.price.toFixed(2)}</span>
-                      <span className="text-xs ml-1">PLN</span>
+            {gastronomyProducts.map((product) => {
+              const currentPrice = getCurrentPrice(product.id, currentRound) // Get price from round-data
+              const remainingQuantity = getRemainingQuantity(product.id, currentRound, purchasedInRound) // Get quantity from round-data
+
+              return (
+                <Card key={product.id} className="overflow-hidden border-none shadow-md">
+                  <CardHeader className="p-4 pb-2">
+                    <CardTitle className="text-lg">{product.name}</CardTitle>
+                    <CardDescription>Price: {currentPrice.toFixed(2)} PLN</CardDescription>
+                  </CardHeader>
+                  <CardContent className="p-4 pt-0 pb-2">
+                    <div className="flex justify-center">
+                      <Image
+                        src={product.image || "/placeholder.svg"}
+                        alt={product.name}
+                        width={100}
+                        height={100}
+                        className="rounded-md object-cover"
+                      />
                     </div>
-                  </div>
-                  <div className="text-sm mb-4">Dostępna ilość: {product.quantity}</div>
-                </div>
-                <CardFooter className="p-4 pt-0 flex gap-2">
-                  <Button
-                    onClick={() => addToCart(product.id)}
-                    variant="outline"
-                    className="flex-1 border-blue-900 text-blue-900 hover:bg-blue-50"
-                  >
-                    <ShoppingCart className="h-4 w-4 mr-2" />
-                    Dodaj do koszyka
-                  </Button>
-                  <Button
-                    onClick={() => buyItem(product.id, product.price)}
-                    className="flex-1 bg-blue-900 hover:bg-blue-800"
-                    disabled={balance < product.price}
-                  >
-                    Kup teraz
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
+                    <div className="mt-2 text-sm">
+                      <div className="flex justify-between">
+                        <span>Available:</span>
+                        <span className={remainingQuantity === 0 ? "text-red-500 font-bold" : ""}>
+                          {remainingQuantity} units
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>In inventory:</span>
+                        <span>{getInventoryCount(product.id, inventory)}</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                  <CardFooter className="p-4 flex flex-col gap-2">
+                    <div className="flex gap-2 w-full">
+                      {currentRound === 1 && (
+                        <Button
+                          onClick={() =>
+                            handleBuy(
+                              product.id,
+                              product.name,
+                              currentPrice,
+                              "gastronomy",
+                              currentRound,
+                              balance,
+                              setBalance,
+                              inventory,
+                              setInventory,
+                              purchasedInRound,
+                              setPurchasedInRound,
+                              purchaseHistory,
+                              setPurchaseHistory,
+                              remainingQuantity,
+                              -1
+                            )
+                          }
+                          className="flex-1"
+                          disabled={remainingQuantity <= 0 || currentPrice > balance || !timerActive}
+                        >
+                          Buy
+                        </Button>
+                      )}
+                      <Button
+                        onClick={() =>
+                          handleOrder(product.id, product.name, orderedItems, setOrderedItems)
+                        }
+                        variant="secondary"
+                        className="flex-1"
+                      >
+                        Order {orderedItems[product.id] ? `(${orderedItems[product.id]})` : ""}
+                      </Button>
+                    </div>
+                  </CardFooter>
+                </Card>
+              )
+            })}
           </div>
         </div>
       </div>
