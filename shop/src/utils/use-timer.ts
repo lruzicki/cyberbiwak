@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
 import { useLocalStorage } from "@/hooks/use-local-storage"
-import { roundData } from "@/products/round-data" // Import round data
 import { handleBuy } from "@/utils/shop-actions"
+import { getRemainingQuantity, getCurrentPrice, getItemInfo } from "@/utils/products-actions" // Import reusable functions
 
 interface UseTimerOptions {
   initialTargetTime: number
@@ -42,39 +42,50 @@ export const useTimer = ({ initialTargetTime, timerActive, totalRounds, onTimerE
     return Math.min(totalRounds, Math.max(Math.ceil(elapsedTime / roundDuration), 0)) // Calculate the current round
   }
 
-  const getRemainingQuantity = (itemId: string) => {
-    const maxPurchases = roundData[currentRound]?.maxPurchases?.[itemId] || 0
-    const alreadyPurchased = purchasedInRound[currentRound]?.[itemId] || 0
-    return Math.max(0, maxPurchases - alreadyPurchased)
-  }
-
-  const getCurrentPrice = (itemId: string) => {
-    const currentRoundData = roundData[currentRound]
-    if (!currentRoundData) return 0
-    return currentRoundData.prices[itemId] || 0
-  }
-
   const purchaseOrderedProducts = (newRound: number) => {
+    let inventoryCopy = { ...inventory }
+    let balanceCopy = balance
+    let purchasedInRoundCopy = { ...purchasedInRound }
+    let purchaseHistoryCopy = [...purchaseHistory]
     Object.entries(orderedItems).forEach(([itemId, quantity]) => {
-      handleBuy(
+      const itemInfo = getItemInfo(itemId) // Assuming getItemInfo returns an object with item details
+      if (!itemInfo) {
+        console.error(`Item info not found for itemId: ${itemId}`)
+        return
+      }
+      console.log(`Purchasing ${quantity} of item ${itemId}`)
+      const { name, category } = itemInfo
+      const {       
+        updatedInventory,
+        updatedBalance,
+        updatedPurchasedInRound,
+        updatedPurchaseHistory } = handleBuy(
         itemId,
-        itemId, // Use itemId as the name if no name is available
-        getCurrentPrice(itemId),
-        "unknown", // Replace with the actual category if available
+        name, // Use the name from itemInfo
+        getCurrentPrice(itemId, newRound), // Use getCurrentPrice from products-actions.ts
+        category, // Use the category from itemInfo
         newRound,
-        balance,
+        balanceCopy,
         setBalance,
-        inventory,
-        setInventory,
-        purchasedInRound,
+        inventoryCopy,
+        setInventory, // Merge new inventory with existing inventory
+        purchasedInRoundCopy,
         setPurchasedInRound,
-        purchaseHistory,
+        purchaseHistoryCopy,
         setPurchaseHistory,
-        getRemainingQuantity(itemId),
-        quantity
+        getRemainingQuantity(itemId, newRound, purchasedInRoundCopy), // Use getRemainingQuantity from products-actions.ts
+        quantity,
+        true
       )
+      inventoryCopy = updatedInventory // Update inventoryCopy with the new inventory
+      balanceCopy = updatedBalance
+      purchasedInRoundCopy = updatedPurchasedInRound
+      purchaseHistoryCopy = updatedPurchaseHistory
     })
-
+    setInventory(inventoryCopy)
+    setBalance(balanceCopy)
+    setPurchasedInRound(purchasedInRoundCopy)
+    setPurchaseHistory(purchaseHistoryCopy)
     toast.success("All ordered products purchased for the new round!")
   }
 
@@ -86,17 +97,19 @@ export const useTimer = ({ initialTargetTime, timerActive, totalRounds, onTimerE
         setTimeRemaining(calculateTimeLeft())
         const newRound = calculateCurrentRound()
         if (newRound !== currentRound) {
+          console.log(`Round changed from ${currentRound} to ${newRound}`)
           console.log(`Round ${newRound}!`)
+          console.log(calculateTimeLeft())
           setCurrentRound(newRound)
           if (newRound > 1) {
             purchaseOrderedProducts(newRound)
-            setOrderedItems({})
             setTimeout(() => {
               toast.info("Round updated!", {
-                description: `You are now in round ${newRound + 1}.`,
-              });
-              window.location.reload();
-            }, 3000);
+                description: `You are now in round ${newRound}.`,
+              })
+              setOrderedItems({})
+              window.location.reload()
+            }, 3000)
           }
         }
       }, 1000)
@@ -120,6 +133,7 @@ export const useTimer = ({ initialTargetTime, timerActive, totalRounds, onTimerE
   const updateTimeRemaining = (newTimeRemaining: number) => {
     const newTargetTime = Date.now() + newTimeRemaining * 1000
     setTimeRemaining(newTimeRemaining)
+    console.log("Time updated")
     setTargetTime(newTargetTime)
     updateTargetTime(newTargetTime)
   }

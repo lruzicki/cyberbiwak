@@ -18,6 +18,9 @@ export default function Shop() {
   const [targetTime, setTargetTime] = useLocalStorage("shop-target-time", Date.now() + 70 * 60 * 1000) // Use targetTime from local storage
   const [inventory, setInventory] = useLocalStorage<Record<string, number>>("shop-inventory", {})
   const [orderedItems, setOrderedItems] = useLocalStorage<Record<string, number>>("shop-ordered-items", {})
+  const [purchaseHistory, setPurchaseHistory] = useLocalStorage<
+    { id: number; itemId: string; itemName: string; price: number; quantity: number; date: string; category: string; round: number }[]
+  >("shop-purchase-history", [])
   const [isAdminMode, setIsAdminMode] = useState(false)
   const [showAdminModal, setShowAdminModal] = useState(false)
   const allItems = Object.values(categories).flat()
@@ -76,7 +79,7 @@ export default function Shop() {
           allItems={allItems}
           setIsAdminMode={setIsAdminMode}
           setOrderedItems={setOrderedItems} // Pass orderedItems setter
-          setPurchaseHistory={() => {}} // No purchase history logic
+          setPurchaseHistory={setPurchaseHistory} // Pass purchase history setter
           setCurrentRound={() => {}} // No current round logic
           setPurchasedInRound={() => {}} // No purchased items logic
           setTargetTime={setTargetTime}
@@ -99,7 +102,7 @@ export default function Shop() {
           </CardContent>
         </Card>
 
-        {/* Inventory, Ordered Items, and Balance Section */}
+        {/* Inventory, Ordered Items, Balance, and Purchase History Section */}
         <div className="flex flex-col md:flex-row gap-8">
           {/* Inventory Section */}
           <Card className="flex-1">
@@ -162,6 +165,42 @@ export default function Shop() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Purchase History Section */}
+        <Card className="mt-8">
+          <CardHeader>
+            <CardTitle>Purchase History</CardTitle>
+            <CardDescription>Review your past purchases</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {purchaseHistory.length > 0 ? (
+              <table className="table-auto w-full text-left border-collapse">
+          <thead>
+            <tr>
+              <th className="border-b px-4 py-2">Item</th>
+              <th className="border-b px-4 py-2">Quantity</th>
+              <th className="border-b px-4 py-2">Price (PLN)</th>
+              <th className="border-b px-4 py-2">Total (PLN)</th>
+              <th className="border-b px-4 py-2">Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            {purchaseHistory.slice().reverse().map((purchase) => (
+                <tr key={purchase.id}>
+                <td className="border-b px-4 py-2">{purchase.itemName}</td>
+                <td className="border-b px-4 py-2">{purchase.quantity}</td>
+                <td className="border-b px-4 py-2">{purchase.price.toFixed(2)}</td>
+                <td className="border-b px-4 py-2">{(purchase.price * purchase.quantity).toFixed(2)}</td>
+                <td className="border-b px-4 py-2 text-gray-500 text-sm">{new Date(purchase.date).toLocaleTimeString()}</td>
+                </tr>
+            ))}
+          </tbody>
+              </table>
+            ) : (
+              <p className="text-gray-500">You have no purchase history.</p>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       {/* Admin Password Modal */}

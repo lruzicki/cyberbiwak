@@ -129,13 +129,14 @@ export const AdminMode: React.FC<AdminModeProps> = ({
           variant="destructive"
           onClick={() => {
             if (confirm("Are you sure you want to clear all data? This action cannot be undone.")) {
+              setTimerActive(false)
               localStorage.clear()
               setBalance(10000) // Reset balance
               setInventory({}) // Reset inventory
               setOrderedItems({}) // Reset cart
               setPurchaseHistory([]) // Reset purchase history
               setTimeRemaining(70 * 60) // Reset timer
-              setCurrentRound(1) // Reset round
+              setCurrentRound(0) // Reset round
               setPurchasedInRound({}) // Reset purchased items
               setTargetTime(Date.now() + 70 * 60 * 1000) // Reset target time
               toast.success("All data has been cleared.")

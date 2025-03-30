@@ -29,7 +29,7 @@ export default function TradingPost() {
     date: string
     category: string
     round: number
-  }>>("purchase-history", [])
+  }>>("shop-purchase-history", [])
   const [timerActive, setTimerActive] = useLocalStorage("shop-timer-active", false)
   const [targetTime, setTargetTime] = useLocalStorage("shop-target-time", Date.now() + 70 * 60 * 1000)
   const [rounds, setRounds] = useState<Round[]>([])
@@ -99,8 +99,8 @@ export default function TradingPost() {
             <TabsContent key={category} value={category} className="mt-0">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {items.map((item) => {
-                  const currentPrice = getCurrentPrice(item.id, currentRound, rounds)
-                  const remainingQuantity = getRemainingQuantity(item.id, currentRound, rounds, purchasedInRound)
+                  const currentPrice = getCurrentPrice(item.id, currentRound)
+                  const remainingQuantity = getRemainingQuantity(item.id, currentRound, purchasedInRound)
 
                   return (
                     <Card key={item.id} className="overflow-hidden">
@@ -153,8 +153,8 @@ export default function TradingPost() {
                                   setPurchasedInRound,
                                   purchaseHistory,
                                   setPurchaseHistory,
-                                  getRemainingQuantity(item.id, currentRound, rounds, purchasedInRound),
-                                  1
+                                  getRemainingQuantity(item.id, currentRound, purchasedInRound),
+                                  -1
                                 )
                               }
                               className="flex-1"
@@ -168,8 +168,7 @@ export default function TradingPost() {
                               handleOrder(
                                 item.id,
                                 item.name,
-                                currentPrice,
-                                { [item.id]: orderedItems[item.id] || 0 },
+                                orderedItems,
                                 setOrderedItems
                               )
                             }
