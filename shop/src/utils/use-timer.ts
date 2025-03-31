@@ -19,7 +19,7 @@ export const useTimer = ({ initialTargetTime, timerActive, totalRounds, onTimerE
   const [timeRemaining, setTimeRemaining] = useLocalStorage("shop-time-remaining", Math.max(0, Math.ceil((initialTargetTime - Date.now()) / 1000))) // Time left in seconds
   const [balance, setBalance] = useLocalStorage("shop-balance", 10000)
   const [orderedItems, setOrderedItems] = useLocalStorage<Record<string, number>>("shop-ordered-items", {})
-  const [inventory, setInventory] = useLocalStorage<Record<string, number>>("shop-inventory", {})
+  const [inventory, setInventory] = useLocalStorage<Record<string, number>>("shop-inventory", { "buk": 3 })
   const [purchasedInRound, setPurchasedInRound] = useLocalStorage<Record<number, Record<string, number>>>("purchased-in-round", {})
   const [purchaseHistory, setPurchaseHistory] = useLocalStorage<{ id: number; itemId: string; itemName: string; price: number; quantity: number; date: string; category: string; round: number; }[]>("shop-purchase-history", [])
 

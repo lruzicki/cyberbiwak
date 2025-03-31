@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { MainNavBar } from "@/components/main-nav-bar"
 import { AdminMode } from "@/components/admin-mode"
 import { AdminPasswordModal } from "@/components/admin-password-modal"
+import { SecretCodeInput } from "@/components/secret-code-input" // Import the SecretCodeInput component
 import { useLocalStorage } from "@/hooks/use-local-storage"
 import { useTimer } from "@/utils/use-timer" // Import the custom hook
 import { useState } from "react"
@@ -16,7 +17,7 @@ export default function Shop() {
   const [balance, setBalance] = useLocalStorage("shop-balance", 10000)
   const [timerActive, setTimerActive] = useLocalStorage("shop-timer-active", false)
   const [targetTime, setTargetTime] = useLocalStorage("shop-target-time", Date.now() + 70 * 60 * 1000) // Use targetTime from local storage
-  const [inventory, setInventory] = useLocalStorage<Record<string, number>>("shop-inventory", {})
+  const [inventory, setInventory] = useLocalStorage<Record<string, number>>("shop-inventory", { "buk": 3 })
   const [orderedItems, setOrderedItems] = useLocalStorage<Record<string, number>>("shop-ordered-items", {})
   const [purchaseHistory, setPurchaseHistory] = useLocalStorage<
     { id: number; itemId: string; itemName: string; price: number; quantity: number; date: string; category: string; round: number }[]
@@ -42,7 +43,7 @@ export default function Shop() {
   const timerProgress = ((70 * 60 - timeRemaining) / (70 * 60)) * 100
 
   const handleAdminConfirm = (password: string) => {
-    if (password === "buk3") {
+    if (password === "n1gg4") {
       setIsAdminMode(true)
       setShowAdminModal(false)
       toast.success("Admin Mode Enabled")
@@ -208,6 +209,15 @@ export default function Shop() {
         isOpen={showAdminModal}
         onClose={() => setShowAdminModal(false)}
         onConfirm={handleAdminConfirm}
+      />
+
+      {/* Secret Code Input */}
+      <SecretCodeInput
+        inventory={inventory}
+        setInventory={setInventory}
+        purchaseHistory={purchaseHistory}
+        setPurchaseHistory={setPurchaseHistory}
+        currentRound={currentRound}
       />
     </div>
   )

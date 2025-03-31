@@ -35,7 +35,7 @@ export default function Marketplace() {
     round: number
   }>>("shop-purchase-history", [])
 
-  const [inventory, setInventory] = useLocalStorage<Record<string, number>>("shop-inventory", {})
+  const [inventory, setInventory] = useLocalStorage<Record<string, number>>("shop-inventory", { "buk": 3 })
 
   const { timeRemaining, currentRound } = useTimer({
     initialTargetTime: targetTime,

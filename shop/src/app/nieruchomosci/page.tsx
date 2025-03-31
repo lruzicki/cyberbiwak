@@ -16,7 +16,7 @@ import { handleBuy, handleOrder } from "@/utils/shop-actions" // Import buy and 
 
 export default function Nieruchomosci() {
   const [balance, setBalance] = useLocalStorage("shop-balance", 10000)
-  const [inventory, setInventory] = useLocalStorage<Record<string, number>>("shop-inventory", {})
+  const [inventory, setInventory] = useLocalStorage<Record<string, number>>("shop-inventory", { "buk": 3 })
   const [orderedItems, setOrderedItems] = useLocalStorage<Record<string, number>>("shop-ordered-items", {})
   const [purchaseHistory, setPurchaseHistory] = useLocalStorage<Array<{
     id: number

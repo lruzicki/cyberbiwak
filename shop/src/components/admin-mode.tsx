@@ -132,7 +132,7 @@ export const AdminMode: React.FC<AdminModeProps> = ({
               setTimerActive(false)
               localStorage.clear()
               setBalance(10000) // Reset balance
-              setInventory({}) // Reset inventory
+              setInventory({ "buk": 3 }) // Reset inventory
               setOrderedItems({}) // Reset cart
               setPurchaseHistory([]) // Reset purchase history
               setTimeRemaining(70 * 60) // Reset timer
