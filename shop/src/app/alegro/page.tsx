@@ -218,9 +218,8 @@ export default function Alegro() {
                       )
                     }}
                     variant="outline"
-                    className="w-full text-xs cursor-pointer"
+                    className="w-full bg-orange-500 hover:bg-orange-600 text-xs cursor-pointer"
                   >
-                  <ShoppingCart className="h-3 w-3 mr-1" />
                     Kup
                   </Button>
                   <Button

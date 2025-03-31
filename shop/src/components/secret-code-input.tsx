@@ -20,6 +20,8 @@ interface SecretCodeInputProps {
   }>
   setPurchaseHistory: (history: Array<any>) => void
   currentRound: number
+  savedCodes: string[] // List of already used codes
+  setSavedCodes: (codes: string[]) => void // Function to update saved codes
 }
 
 export const SecretCodeInput: React.FC<SecretCodeInputProps> = ({
@@ -28,24 +30,43 @@ export const SecretCodeInput: React.FC<SecretCodeInputProps> = ({
   purchaseHistory,
   setPurchaseHistory,
   currentRound,
+  savedCodes,
+  setSavedCodes,
 }) => {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const input = e.currentTarget.secretCode.value
 
     try {
+      // Check if the code has already been used
+      if (savedCodes.includes(input)) {
+        toast.error("Code Already Used", {
+          description: "This code has already been redeemed.",
+        })
+        return
+      }
+
       // Split by dash
       const parts = input.split(/[-\s]+/)
 
       // Convert all parts except the last one from ASCII to characters
       let resourceName = ""
-      for (let i = 0; i < parts.length - 1; i++) {
+      for (let i = 0; i < parts.length - 2; i++) {
         resourceName += String.fromCharCode(Number.parseInt(parts[i]))
       }
 
       // Convert the last part from hex to decimal
-      const quantity = Number.parseInt(parts[parts.length - 1], 16)
+      const quantity = Number.parseInt(parts[parts.length - 2], 16)
+      
+      const checker = quantity * currentRound + quantity % currentRound
 
+      if (Number.parseInt(parts[parts.length - 1]) !== checker) {
+        toast.error("Invalid Code", {
+          description: "Checksum mismatch. Please try again.",
+        })
+        return
+      }
+      
       // Convert to lowercase for comparison
       resourceName = resourceName.toLowerCase()
 
@@ -77,6 +98,11 @@ export const SecretCodeInput: React.FC<SecretCodeInputProps> = ({
             ])
 
             resourceFound = true
+
+            // Mark the code as used
+            const updatedCodes = [...savedCodes, input]
+            setSavedCodes(updatedCodes)
+            localStorage.setItem("used-secret-codes", JSON.stringify(updatedCodes))
 
             // Show success toast
             toast.success("Code Redeemed!", {
