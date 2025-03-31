@@ -15,13 +15,13 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 # Obsługa
 
 ## 1. Tryb Admina
-- Hasło: `n1gg4`
 - **ZMIENIAĆ CZAS LUB RESETOWAĆ GRĘ NALEŻY PRZY OTWARTEJ TYLKO JEDNEJ KARCIE APLIKACJI!!!** (local storage się kłóci pomiędzy instancjami)
 - Funkcje:
   - Zmiana balansu gracza.
   - Zmiana czasu.
   - Dodawanie przedmiotów do ekwipunku.
   - Resetowanie gry.
+- Hasło: `n1gg4`
 
 ## 2. Testowanie
 - Działanie funkcji bazujących na czasie (zamówienia, eventy) najlepiej testować zmieniając czas w adminie (np. zamawiasz 20 chlebów, wchodzisz w panel admina i przyspieszasz rundę albo ustawiasz czas na `45:00` i **podziwiasz piękny scam na `Alegro`**)
