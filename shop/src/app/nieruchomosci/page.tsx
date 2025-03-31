@@ -62,8 +62,10 @@ export default function Nieruchomosci() {
     <div className="min-h-screen bg-gray-100">
       <MainNavBar
         balance={balance}
+        setBalance={setBalance}
         orderedItemsCount={Object.values(orderedItems).reduce((a: number, b: number) => a + (b as number), 0)}
         currentRound={currentRound}
+        timeRemaining={timeRemaining}
         onAdminClick={() => {
           console.log("Admin button clicked")
         }}

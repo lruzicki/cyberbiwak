@@ -73,8 +73,10 @@ export default function TradingPost() {
     <div>
       <MainNavBar
         balance={balance}
+        setBalance={setBalance}
         orderedItemsCount={Object.values(orderedItems).reduce((a: number, b: number) => a + (b as number), 0)}
         currentRound={currentRound}
+        timeRemaining={timeRemaining}
         onAdminClick={() => setShowAdminModal(true)}
       />
 

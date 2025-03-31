@@ -60,9 +60,11 @@ export default function Shop() {
     <div>
       {/* Navbar */}
       <MainNavBar
-        balance={parseFloat(balance.toFixed(2))} // Ensure balance is rounded to 2 decimals
+        balance={balance} // Ensure balance is rounded to 2 decimals
+        setBalance={setBalance} // Round balance when updating
         orderedItemsCount={Object.values(orderedItems).reduce((a, b) => a + b, 0)} // Updated to use orderedItems
         currentRound={currentRound} // Pass the current round to the MainNavBar
+        timeRemaining={timeRemaining} // Pass the time remaining to the MainNavBar
         onAdminClick={() => setShowAdminModal(true)}
       />
 

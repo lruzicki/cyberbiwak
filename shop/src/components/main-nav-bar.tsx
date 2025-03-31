@@ -5,25 +5,47 @@ import { ShoppingCart, Home, Store, Package, Building, ShoppingBag, User } from 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { AdminPasswordModal } from "@/components/admin-password-modal"
+import { LuckyUserAd } from "@/components/lucky-user-ad" // Import LuckyUserAd
 import { useEffect, useState } from "react"
 
 interface MainNavBarProps {
   balance: number
   orderedItemsCount: number
   currentRound: number // Add currentRound as a prop
+  timeRemaining: number // Add timeRemaining as a prop
+  setBalance: (newBalance: number) => void // Add setBalance as a prop
   onAdminClick: () => void
 }
 
-export function MainNavBar({ balance, orderedItemsCount, currentRound, onAdminClick }: MainNavBarProps) {
+export function MainNavBar({ balance, orderedItemsCount, currentRound, timeRemaining, setBalance, onAdminClick }: MainNavBarProps) {
   const [isClient, setIsClient] = useState(false)
+  const [showLuckyAd, setShowLuckyAd] = useState(false)
 
   useEffect(() => {
     setIsClient(true)
-  }, [])
+    if ((timeRemaining <= 55 * 60 && timeRemaining > 55 * 60 - 3)
+      || (timeRemaining <= 28 * 60 && timeRemaining > 28 * 60 - 3)
+    ) {
+      setShowLuckyAd(true)
+    }
+  }, [timeRemaining])
 
   return (
     <div className="bg-gray-800 text-white sticky top-0 left-0 right-0 z-50">
+      {/* Lucky User Ad */}
+      {showLuckyAd && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <LuckyUserAd
+            balance={balance}
+            setBalance={(newBalance) => {
+              setBalance(newBalance)
+              setShowLuckyAd(false) // Hide the ad after interaction
+            }}
+            setShowLuckyAd={setShowLuckyAd} // Pass setShowLuckyAd to LuckyUserAd
+          />
+        </div>
+      )}
+
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-4">

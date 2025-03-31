@@ -38,7 +38,7 @@ export default function Allegro() {
   const [targetTime, setTargetTime] = useLocalStorage("shop-target-time", Date.now() + 70 * 60 * 1000)
   const [timerActive, setTimerActive] = useLocalStorage("shop-timer-active", false)
 
-  const { currentRound } = useTimer({
+  const { timeRemaining, currentRound } = useTimer({
     initialTargetTime: targetTime,
     timerActive,
     totalRounds: 7,
@@ -57,8 +57,10 @@ export default function Allegro() {
     <div className="min-h-screen bg-gray-100">
       <MainNavBar
         balance={balance}
+        setBalance={setBalance}
         orderedItemsCount={Object.values(orderedItems).reduce((a: number, b: number) => a + (b as number), 0)}
         currentRound={currentRound}
+        timeRemaining={timeRemaining}
         onAdminClick={() => {
           console.log("Admin button clicked")
         }}
