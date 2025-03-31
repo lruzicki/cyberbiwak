@@ -1,41 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GIERA NA CYBERBIWAK - SHOP TO AKTUALNA APKA
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
-cd shop-interface
+cd shop
 
 npm install
 
 npm run dev
-
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+# Obsługa
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 1. Tryb Admina
+- Hasło: `n1gg4`
+- **ZMIENIAĆ CZAS LUB RESETOWAĆ GRĘ NALEŻY PRZY OTWARTEJ TYLKO JEDNEJ KARCIE APLIKACJI!!!** (local storage się kłóci pomiędzy instancjami)
+- Funkcje:
+  - Zmiana balansu gracza.
+  - Zmiana czasu.
+  - Dodawanie przedmiotów do ekwipunku.
+  - Resetowanie gry.
 
-## Learn More
+## 2. Testowanie
+- Działanie funkcji bazujących na czasie (zamówienia, eventy) najlepiej testować zmieniając czas w adminie (np. zamawiasz 20 chlebów, wchodzisz w panel admina i przyspieszasz rundę albo ustawiasz czas na `45:00` i **podziwiasz piękny scam na `Alegro`**)
 
-To learn more about Next.js, take a look at the following resources:
+## 3. Bonusowy Kod
+- Struktura kodu (oddzielone `spacjami` lub `-`):
+    - Nazwa zasobu zamieniona na ASCII 
+    - Ilość w hex
+    - (ilość * runda) + (ilość % runda) w dziesiętnym
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 4. Reklamy i Promocje
+- Wyświetlanie dynamicznych reklam, takich jak:
+  - "Lucky User Ad" – `55:00` i `28:00`.
+  - "Allegro Redirect" – przekierowanie do scam stronki "Alegro" - `45:00`, `37:00`, `22:00`, `15:00`, `7:00`, `2:00`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 5. Obsługa Lokalna
+- Wszystkie dane, takie jak ekwipunek, historia zakupów, użyte kody i balans, są przechowywane w Local Storage.
+- Dane są automatycznie ładowane przy ponownym uruchomieniu aplikacji.
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 6. Koniec Gry
+- Pod koniec gry automatycznie pobierany jest plik z podsumowaniem.
