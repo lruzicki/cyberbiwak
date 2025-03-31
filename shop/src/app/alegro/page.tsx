@@ -14,21 +14,11 @@ import { categories } from "@/products/products" // Use categories from products
 import { useTimer } from "@/utils/use-timer"
 import { getCurrentPrice, getRemainingQuantity } from "@/utils/products-actions"
 import { handleBuy, handleOrder } from "@/utils/shop-actions"
+import { toast } from "sonner";
 
-export default function Allegro() {
+export default function Alegro() {
   const [balance, setBalance] = useLocalStorage("shop-balance", 10000)
-  const [inventory, setInventory] = useLocalStorage<Record<string, number>>("shop-inventory", { "buk": 3 })
   const [orderedItems, setOrderedItems] = useLocalStorage<Record<string, number>>("shop-ordered-items", {})
-  const [purchaseHistory, setPurchaseHistory] = useLocalStorage<Array<{
-    id: number
-    itemId: string
-    itemName: string
-    price: number
-    quantity: number
-    date: string
-    category: string
-    round: number
-  }>>("shop-purchase-history", [])
   const [purchasedInRound, setPurchasedInRound] = useLocalStorage<Record<number, Record<string, number>>>(
     "purchased-in-round",
     {}
@@ -50,26 +40,8 @@ export default function Allegro() {
   const filteredProducts = Object.entries(categories)
     .filter(([categoryKey]) => selectedCategory === "all" || categoryKey === selectedCategory)
     .flatMap(([, items]) =>
-      items.filter((product) => {
-        if (product.category === "food" || product.category === "ground") {
-          const seed =
-            currentRound +
-            product.id.charCodeAt(0) +
-            product.id.charCodeAt(product.id.length - 1) +
-            product.id.length;
-          const randomFromSeed = Math.abs(Math.sin(seed)) % 1;
-          const shouldDisplay = randomFromSeed > 0.5;
-          if (!shouldDisplay) {
-            return false;
-          }
-        }
-
-        return (
-          product.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-          getRemainingQuantity(product.id, currentRound, purchasedInRound) > 0
-        );
-      })
-    );
+      items.filter((product) => product.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    )
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -201,13 +173,22 @@ export default function Allegro() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {filteredProducts.map((product) => {
             const currentPrice = getCurrentPrice(product.id, currentRound)
-            const remainingQuantity = getRemainingQuantity(product.id, currentRound, purchasedInRound)
+            const discount = Math.min(Math.floor(30 + (product.id.charCodeAt(0) % 10) * 5), 90)
+            const remainingQuantity = product.id
+              .split("")
+              .reduce((sum, char) => sum + (char.charCodeAt(0) - 68), 0)
 
             return (
               <Card key={product.id} className="overflow-hidden">
                 <CardHeader className="p-4 pb-2">
                   <CardTitle className="text-lg">{product.name}</CardTitle>
-                  <CardDescription>Price: {currentPrice.toFixed(2)} PLN</CardDescription>
+                    <CardDescription>
+                      Price: {(currentPrice * discount / 100).toFixed(2)} PLN{" "}
+                      <span className="text-red-500 font-bold">(-{discount}%)</span>{" "}
+                      <span className="line-through text-gray-500">
+                      {(currentPrice).toFixed(2)} PLN
+                      </span>
+                    </CardDescription>
                 </CardHeader>
                 <CardContent className="p-4 pt-0 pb-2">
                   <div className="aspect-square relative mb-2">
@@ -221,37 +202,29 @@ export default function Allegro() {
                   <div className="text-xs mb-2">Dostępna ilość: {remainingQuantity}</div>
                 </CardContent>
                 <CardFooter className="p-4 pt-0 flex flex-col gap-2">
-                    {currentRound === 1 && (
-                    <Button
-                      onClick={() =>
-                      handleBuy(
-                        product.id,
-                        product.name,
-                        currentPrice,
-                        selectedCategory,
-                        currentRound,
-                        balance,
-                        setBalance,
-                        inventory,
-                        setInventory,
-                        purchasedInRound,
-                        setPurchasedInRound,
-                        purchaseHistory,
-                        setPurchaseHistory,
-                        remainingQuantity,
-                        -1
-                      )
-                      }
-                      className="w-full bg-orange-500 hover:bg-orange-600 text-xs"
-                      disabled={remainingQuantity <= 0 || currentPrice > balance || !timerActive}
-                    >
-                      Kup
-                    </Button>
-                    )}
                   <Button
-                    onClick={() =>
-                      handleOrder(product.id, product.name, orderedItems, setOrderedItems)
-                    }
+                    onClick={() => {
+                      const quantity = parseInt(prompt(`Enter quantity for ${product.name}:`) || "0", 10)
+                      if (isNaN(quantity) || quantity <= 0) {
+                        toast.error("Invalid quantity entered.")
+                        return
+                      }
+
+                      const totalCost = currentPrice * discount / 100 * quantity
+
+                      setBalance(balance - totalCost)
+                      toast.success(
+                        `You bought ${quantity} ${product.name}(s) for ${totalCost} PLN.`
+                      )
+                    }}
+                    variant="outline"
+                    className="w-full text-xs"
+                  >
+                  <ShoppingCart className="h-3 w-3 mr-1" />
+                    Kup
+                  </Button>
+                  <Button
+                    onClick={() => {}}
                     variant="outline"
                     className="w-full text-xs"
                   >

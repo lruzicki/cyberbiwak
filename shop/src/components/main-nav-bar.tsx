@@ -5,28 +5,42 @@ import { ShoppingCart, Home, Store, Package, Building, ShoppingBag, User } from 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { LuckyUserAd } from "@/components/lucky-user-ad" // Import LuckyUserAd
+import { LuckyUserAd } from "@/components/lucky-user-ad"
+import { AllegroRedirectMessage } from "@/components/allegro-redirect-message" // Import AllegroRedirectMessage
 import { useEffect, useState } from "react"
 
 interface MainNavBarProps {
   balance: number
   orderedItemsCount: number
-  currentRound: number // Add currentRound as a prop
-  timeRemaining: number // Add timeRemaining as a prop
-  setBalance: (newBalance: number) => void // Add setBalance as a prop
+  currentRound: number
+  timeRemaining: number
+  setBalance: (newBalance: number) => void
   onAdminClick: () => void
+  timerActive: boolean
 }
 
-export function MainNavBar({ balance, orderedItemsCount, currentRound, timeRemaining, setBalance, onAdminClick }: MainNavBarProps) {
+export function MainNavBar({ balance, orderedItemsCount, currentRound, timeRemaining, setBalance, onAdminClick, timerActive }: MainNavBarProps) {
   const [isClient, setIsClient] = useState(false)
   const [showLuckyAd, setShowLuckyAd] = useState(false)
+  const [showAllegroRedirect, setShowAllegroRedirect] = useState(false)
 
   useEffect(() => {
     setIsClient(true)
+    if (!timerActive) return // Don't show ads if the timer is not active
     if ((timeRemaining <= 55 * 60 && timeRemaining > 55 * 60 - 3)
       || (timeRemaining <= 28 * 60 && timeRemaining > 28 * 60 - 3)
-    ) {
+      ) {
       setShowLuckyAd(true)
+    }
+    // Show AllegroRedirectMessage at a specific time
+    if (timeRemaining <= 45 * 60 && timeRemaining > 45 * 60 - 3
+      || timeRemaining <= 37 * 60 && timeRemaining > 37 * 60 - 3
+      || timeRemaining <= 22 * 60 && timeRemaining > 22 * 60 - 3
+      || timeRemaining <= 15 * 60 && timeRemaining > 15 * 60
+      || timeRemaining <= 7 * 60 && timeRemaining > 7 * 60
+      || timeRemaining <= 2 * 60 && timeRemaining > 2 * 60
+    ) {
+      setShowAllegroRedirect(true)
     }
   }, [timeRemaining])
 
@@ -45,6 +59,13 @@ export function MainNavBar({ balance, orderedItemsCount, currentRound, timeRemai
           />
         </div>
       )}
+
+      {/* Allegro Redirect Message */}
+      {showAllegroRedirect && window.location.pathname !== "/alegro" && (
+        <div className="fixed top-10 left-10 bg-black bg-opacity-75 p-4 rounded-lg shadow-lg z-50">
+          <AllegroRedirectMessage />
+        </div>
+            )}
 
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">

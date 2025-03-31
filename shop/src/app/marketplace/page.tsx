@@ -51,9 +51,24 @@ export default function Marketplace() {
   )
 
   // Filter products based on the search query
-  const filteredProducts = allProducts.filter((product) =>
-    product.name.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const filteredProducts = Object.entries(categories)
+    .flatMap(([, items]) =>
+      items.filter((product) => {
+        if (product.category === "food" || product.category === "ground") {
+          const seed = currentRound + product.id.charCodeAt(0) + product.id.charCodeAt(product.id.length - 1) + product.id.length;
+          const randomFromSeed = Math.abs(Math.sin(seed)) % 1;
+          const shouldDisplay = randomFromSeed > 0.5;
+          if (!shouldDisplay) {
+            return false;
+          }
+        }
+
+        return (
+          product.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+          getRemainingQuantity(product.id, currentRound, purchasedInRound) > 0
+        );
+      })
+    );
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -66,6 +81,7 @@ export default function Marketplace() {
         onAdminClick={() => {
           console.log("Admin button clicked")
         }}
+        timerActive={timerActive}
       />
 
       <div className="container mx-auto py-8 px-4">
@@ -121,10 +137,11 @@ export default function Marketplace() {
                     className="flex-1"
                   >
                     <ShoppingCart className="h-4 w-4 mr-2" />
-                    Dodaj do koszyka
+                    Zamów
                   </Button>
-                  <Button
-                    onClick={() =>
+                    {currentRound === 1 && (
+                    <Button
+                      onClick={() =>
                       handleBuy(
                         product.id,
                         product.name,
@@ -142,12 +159,13 @@ export default function Marketplace() {
                         remainingQuantity,
                         -1
                       )
-                    }
-                    className="flex-1"
-                    disabled={remainingQuantity <= 0 || currentPrice > balance || !timerActive}
-                  >
-                    Kup teraz
-                  </Button>
+                      }
+                      className="flex-1"
+                      disabled={remainingQuantity <= 0 || currentPrice > balance || !timerActive}
+                    >
+                      Kup
+                    </Button>
+                    )}
                 </CardFooter>
               </Card>
             )

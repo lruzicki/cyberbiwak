@@ -69,6 +69,7 @@ export default function Nieruchomosci() {
         onAdminClick={() => {
           console.log("Admin button clicked")
         }}
+        timerActive={timerActive}
       />
 
       <header className="bg-white border-b py-4">
@@ -181,6 +182,7 @@ export default function Nieruchomosci() {
                   <div className="flex justify-between items-end mb-4">
                     <div>
                       <div className="font-bold text-lg">Cena: {currentPrice.toFixed(2)} PLN</div>
+                      <div className="text-sm text-gray-500">Ilość: {remainingQuantity}</div> {/* Quantity shown here */}
                     </div>
                   </div>
                   <div className="flex gap-2">

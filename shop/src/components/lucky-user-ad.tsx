@@ -42,9 +42,9 @@ export const LuckyUserAd: React.FC<LuckyUserAdProps> = ({ balance, setBalance, s
       </Button>
     <Button
       onClick={() => setShowLuckyAd(false)}
-      className="mt-2 bg-gray-500 hover:bg-gray-600 text-white"
+      className="absolute top-2 right-2 bg-gray-300 hover:bg-gray-400 text-gray-700 opacity-80 hover:opacity-100 text-xs px-2 py-1 rounded"
     >
-      Close Ad
+      ✕
     </Button>
     </div>
   )

@@ -78,6 +78,7 @@ export default function TradingPost() {
         currentRound={currentRound}
         timeRemaining={timeRemaining}
         onAdminClick={() => setShowAdminModal(true)}
+        timerActive={timerActive}
       />
 
       <div className="container mx-auto py-8 px-4">
@@ -103,6 +104,17 @@ export default function TradingPost() {
                 {items.map((item) => {
                   const currentPrice = getCurrentPrice(item.id, currentRound)
                   const remainingQuantity = getRemainingQuantity(item.id, currentRound, purchasedInRound)
+                  if (category === "food" || category === "ground") {
+                    const seed = currentRound + item.id.charCodeAt(0) + item.id.charCodeAt(item.id.length - 1) + item.id.length;
+                    const randomFromSeed = Math.abs(Math.sin(seed)) % 1;
+                    const shouldDisplay = randomFromSeed > 0.5;
+                    if (!shouldDisplay) {
+                      return null;
+                    }
+                  }
+                  if (remainingQuantity === 0) {
+                    return null
+                    }
 
                   return (
                     <Card key={item.id} className="overflow-hidden">

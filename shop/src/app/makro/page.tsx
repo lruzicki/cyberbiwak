@@ -64,6 +64,7 @@ export default function Makro() {
         onAdminClick={() => {
           console.log("Admin button clicked")
         }}
+        timerActive={timerActive}
       />
 
       {/* Makro header */}

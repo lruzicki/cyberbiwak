@@ -3,7 +3,7 @@ import { categories } from "@/products/products"
 import { roundData } from "@/products/round-data"
 
 export const getCurrentPrice = (itemId: string, currentRound: number): number => {
-  const currentRoundData = roundData[currentRound]
+  const currentRoundData = roundData[currentRound - 1]
   if (!currentRoundData) return 0
   return currentRoundData.prices[itemId] || 0
 }

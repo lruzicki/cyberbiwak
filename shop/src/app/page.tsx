@@ -66,6 +66,7 @@ export default function Shop() {
         currentRound={currentRound} // Pass the current round to the MainNavBar
         timeRemaining={timeRemaining} // Pass the time remaining to the MainNavBar
         onAdminClick={() => setShowAdminModal(true)}
+        timerActive={timerActive} // Pass the timer active state to the MainNavBar
       />
 
       {/* Admin Mode */}

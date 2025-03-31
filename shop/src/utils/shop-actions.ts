@@ -101,7 +101,7 @@ export const handleBuy = (
         itemName,
         price,
         quantity: purchasableQuantity,
-        date: Date.now().toString(),
+        date: new Date().toISOString(),
         category,
         round: currentRound,
       },

@@ -53,7 +53,6 @@ export const useTimer = ({ initialTargetTime, timerActive, totalRounds, onTimerE
         console.error(`Item info not found for itemId: ${itemId}`)
         return
       }
-      console.log(`Purchasing ${quantity} of item ${itemId}`)
       const { name, category } = itemInfo
       const {       
         updatedInventory,
@@ -97,9 +96,6 @@ export const useTimer = ({ initialTargetTime, timerActive, totalRounds, onTimerE
         setTimeRemaining(calculateTimeLeft())
         const newRound = calculateCurrentRound()
         if (newRound !== currentRound) {
-          console.log(`Round changed from ${currentRound} to ${newRound}`)
-          console.log(`Round ${newRound}!`)
-          console.log(calculateTimeLeft())
           setCurrentRound(newRound)
           if (newRound > 1) {
             purchaseOrderedProducts(newRound)
@@ -133,7 +129,6 @@ export const useTimer = ({ initialTargetTime, timerActive, totalRounds, onTimerE
   const updateTimeRemaining = (newTimeRemaining: number) => {
     const newTargetTime = Date.now() + newTimeRemaining * 1000
     setTimeRemaining(newTimeRemaining)
-    console.log("Time updated")
     setTargetTime(newTargetTime)
     updateTargetTime(newTargetTime)
   }
