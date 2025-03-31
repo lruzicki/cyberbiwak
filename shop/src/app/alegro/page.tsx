@@ -82,7 +82,7 @@ export default function Alegro() {
                 />
                 <div className="absolute right-0 top-0 h-full">
                   <div className="h-full flex items-center">
-                    <Button className="h-full rounded-l-none bg-orange-500 hover:bg-orange-600">SZUKAJ</Button>
+                    <Button className="cursor-pointer h-full rounded-l-none bg-orange-500 hover:bg-orange-600">SZUKAJ</Button>
                   </div>
                 </div>
               </div>
@@ -218,7 +218,7 @@ export default function Alegro() {
                       )
                     }}
                     variant="outline"
-                    className="w-full text-xs"
+                    className="w-full text-xs cursor-pointer"
                   >
                   <ShoppingCart className="h-3 w-3 mr-1" />
                     Kup
@@ -226,7 +226,7 @@ export default function Alegro() {
                   <Button
                     onClick={() => {}}
                     variant="outline"
-                    className="w-full text-xs"
+                    className="w-full text-xs cursor-pointer"
                   >
                     <ShoppingCart className="h-3 w-3 mr-1" />
                     Zamów {orderedItems[product.id] ? `(${orderedItems[product.id]})` : ""}

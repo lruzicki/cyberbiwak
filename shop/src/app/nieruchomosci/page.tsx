@@ -76,7 +76,7 @@ export default function Nieruchomosci() {
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <Button variant="ghost" size="icon" className="md:hidden mr-2">
+              <Button variant="ghost" size="icon" className="md:hidden mr-2 cursor-pointer">
                 <Menu className="h-5 w-5" />
               </Button>
               <Link href="/nieruchomosci" className="flex items-center">
@@ -85,14 +85,14 @@ export default function Nieruchomosci() {
               </Link>
             </div>
             <div className="flex items-center space-x-4">
-              <Button variant="ghost" className="flex items-center text-gray-700">
+              <Button variant="ghost" className="flex items-center text-gray-700 cursor-pointer">
                 <Heart className="h-5 w-5 mr-1" />
                 <span className="hidden md:inline">Ulubione</span>
               </Button>
-              <Button variant="ghost" className="flex items-center text-gray-700">
+              <Button variant="ghost" className="flex items-center text-gray-700 cursor-pointer">
                 <span className="hidden md:inline">Dodaj ogłoszenie</span>
               </Button>
-              <Button variant="ghost" className="flex items-center text-gray-700">
+              <Button variant="ghost" className="flex items-center text-gray-700 cursor-pointer">
                 <User className="h-5 w-5 mr-1" />
                 <span className="hidden md:inline">Zaloguj</span>
               </Button>
@@ -130,12 +130,12 @@ export default function Nieruchomosci() {
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
                 />
-                <button className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">×</button>
+                <button className="cursor-pointer absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">×</button>
               </div>
             </div>
             <div className="flex">
               <Input type="text" placeholder="+0 km" className="w-24 rounded-r-none" />
-              <Button variant="outline" className="rounded-l-none border-l-0">
+              <Button variant="outline" className="rounded-l-none border-l-0 cursor-pointer">
                 <Filter className="h-4 w-4 mr-2" />
                 Filtry
               </Button>
@@ -170,7 +170,7 @@ export default function Nieruchomosci() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="absolute top-2 right-2 bg-white/80 rounded-full h-8 w-8"
+                    className="absolute top-2 right-2 bg-white/80 rounded-full h-8 w-8 cursor-pointer"
                     onClick={() => toggleFavorite(property.id)}
                   >
                     <Heart className="h-5 w-5 text-gray-500" />
@@ -208,7 +208,7 @@ export default function Nieruchomosci() {
                           )
                         }
                         variant="outline"
-                        className="flex-1"
+                        className="flex-1 cursor-pointer"
                         disabled={remainingQuantity <= 0 || currentPrice > balance || !timerActive}
                       >
                         Kup
@@ -218,7 +218,7 @@ export default function Nieruchomosci() {
                       onClick={() =>
                         handleOrder(property.id, property.name, orderedItems, setOrderedItems)
                       }
-                      className="flex-1 bg-orange-500 hover:bg-orange-600"
+                      className="flex-1 bg-orange-500 hover:bg-orange-600 cursor-pointer"
                     >
                       Zamów {orderedItems[property.id] ? `(${orderedItems[property.id]})` : ""}
                     </Button>

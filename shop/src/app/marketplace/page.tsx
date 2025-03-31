@@ -88,7 +88,7 @@ export default function Marketplace() {
         <div className="bg-white p-4 rounded-lg shadow mb-6">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-2xl font-bold">Znaleźliśmy ponad {filteredProducts.length} ogłoszeń</h1>
-            <Button className="bg-teal-500 hover:bg-teal-600">Dodaj ogłoszenie</Button>
+            <Button className="bg-teal-500 hover:bg-teal-600 cursor-pointer">Dodaj ogłoszenie</Button>
           </div>
 
           <div className="relative mb-4">
@@ -134,10 +134,10 @@ export default function Marketplace() {
                       handleOrder(product.id, product.name, orderedItems, setOrderedItems)
                     }
                     variant="outline"
-                    className="flex-1"
+                    className="flex-1 cursor-pointer"
                   >
                     <ShoppingCart className="h-4 w-4 mr-2" />
-                    Zamów
+                    Zamów {orderedItems[product.id] ? `(${orderedItems[product.id]})` : ""}
                   </Button>
                     {currentRound === 1 && (
                     <Button
@@ -160,7 +160,7 @@ export default function Marketplace() {
                         -1
                       )
                       }
-                      className="flex-1"
+                      className="flex-1 cursor-pointer"
                       disabled={remainingQuantity <= 0 || currentPrice > balance || !timerActive}
                     >
                       Kup

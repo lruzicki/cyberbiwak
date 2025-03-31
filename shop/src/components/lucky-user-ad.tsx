@@ -36,13 +36,13 @@ export const LuckyUserAd: React.FC<LuckyUserAdProps> = ({ balance, setBalance, s
       <Button
         onClick={handleDoubleMoney}
         disabled={isClicked}
-        className="mt-4 bg-yellow-500 hover:bg-yellow-600 text-white"
+        className="cursor-pointer mt-4 bg-yellow-500 hover:bg-yellow-600 text-white"
       >
         {isClicked ? "Thank You!" : "Double Your Money"}
       </Button>
     <Button
       onClick={() => setShowLuckyAd(false)}
-      className="absolute top-2 right-2 bg-gray-300 hover:bg-gray-400 text-gray-700 opacity-80 hover:opacity-100 text-xs px-2 py-1 rounded"
+      className="cursor-pointer absolute top-2 right-2 bg-gray-300 hover:bg-gray-400 text-gray-700 opacity-80 hover:opacity-100 text-xs px-2 py-1 rounded"
     >
       ✕
     </Button>

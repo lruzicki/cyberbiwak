@@ -114,6 +114,27 @@ export const useTimer = ({ initialTargetTime, timerActive, totalRounds, onTimerE
       toast.error("Game Over!", {
         description: "The countdown has ended.",
       })
+      const downloadData = () => {
+        const formattedInventory = Object.entries(inventory).reduce((acc, [key, value]) => {
+          acc.push(`${key}: ${value}`)
+          return acc
+        }, [] as string[]).join("\n")
+
+        const data = `Inventory:\n${formattedInventory}\n\nBalance: ${balance}`
+        const blob = new Blob([data], { type: "text/plain" })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement("a")
+        a.href = url
+        a.download = "inventory_balance.txt"
+        a.click()
+        URL.revokeObjectURL(url)
+
+      }
+
+      downloadData()
+      setTimeout(() => {
+        window.location.href = "/"
+      }, 3000)
     } else if (!timerActive) {
       interval = setInterval(() => {
         setTargetTime((prevTargetTime) => prevTargetTime + 1000)

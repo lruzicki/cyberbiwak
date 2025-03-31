@@ -44,10 +44,10 @@ export function AdminPasswordModal({ isOpen, onClose, onConfirm }: AdminPassword
             />
           </div>
           <div className="flex justify-end">
-            <Button type="button" variant="secondary" onClick={onClose}>
+            <Button type="button" variant="secondary" onClick={onClose} className="cursor-pointer">
               Cancel
             </Button>
-            <Button type="submit" className="ml-2">
+            <Button type="submit" className="ml-2 cursor-pointer">
               Confirm
             </Button>
           </div>

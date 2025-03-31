@@ -110,7 +110,7 @@ export default function Allegro() {
                 />
                 <div className="absolute right-0 top-0 h-full">
                   <div className="h-full flex items-center">
-                    <Button className="h-full rounded-l-none bg-orange-500 hover:bg-orange-600">SZUKAJ</Button>
+                    <Button className="cursor-pointer h-full rounded-l-none bg-orange-500 hover:bg-orange-600">SZUKAJ</Button>
                   </div>
                 </div>
               </div>
@@ -242,7 +242,7 @@ export default function Allegro() {
                         -1
                       )
                       }
-                      className="w-full bg-orange-500 hover:bg-orange-600 text-xs"
+                      className="w-full bg-orange-500 hover:bg-orange-600 text-xs cursor-pointer"
                       disabled={remainingQuantity <= 0 || currentPrice > balance || !timerActive}
                     >
                       Kup
@@ -253,7 +253,7 @@ export default function Allegro() {
                       handleOrder(product.id, product.name, orderedItems, setOrderedItems)
                     }
                     variant="outline"
-                    className="w-full text-xs"
+                    className="w-full text-xs cursor-pointer"
                   >
                     <ShoppingCart className="h-3 w-3 mr-1" />
                     Zamów {orderedItems[product.id] ? `(${orderedItems[product.id]})` : ""}

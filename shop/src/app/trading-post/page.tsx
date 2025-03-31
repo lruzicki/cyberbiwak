@@ -171,7 +171,7 @@ export default function TradingPost() {
                                   -1
                                 )
                               }
-                              className="flex-1"
+                              className="flex-1 cursor-pointer"
                               disabled={remainingQuantity <= 0 || currentPrice > balance || !timerActive}
                             >
                               Buy
@@ -187,7 +187,7 @@ export default function TradingPost() {
                               )
                             }
                             variant="secondary"
-                            className="flex-1"
+                            className="flex-1 cursor-pointer"
                           >
                             Order {orderedItems[item.id] ? `(${orderedItems[item.id]})` : ""}
                           </Button>

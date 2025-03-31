@@ -127,7 +127,7 @@ export function MainNavBar({ balance, orderedItemsCount, currentRound, timeRemai
             {/* User account */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full text-white hover:bg-gray-700">
+                <Button variant="ghost" size="icon" className="cursor-pointer rounded-full text-white hover:bg-gray-700">
                   <User className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
@@ -169,7 +169,7 @@ export function MainNavBar({ balance, orderedItemsCount, currentRound, timeRemai
               <Button
                 variant="outline"
                 onClick={() => onAdminClick()}
-                className="ml-4 text-gray-800 border-gray-800 hover:bg-gray-100"
+                className="ml-4 text-gray-800 border-gray-800 hover:bg-gray-100 cursor-pointer"
               >
                 Admin Mode
               </Button>

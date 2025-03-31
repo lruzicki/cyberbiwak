@@ -148,5 +148,5 @@ export const handleOrder = (
     });
   }
 
-  toast.success(`You ordered ${quantity} ${itemName}(s) for ${quantity} PLN.`);
+  toast.success(`You ordered ${quantity} ${itemName}(s).`);
 };

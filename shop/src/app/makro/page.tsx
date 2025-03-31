@@ -78,19 +78,19 @@ export default function Makro() {
 
             {/* Customer segments */}
             <div className="hidden md:flex items-center space-x-4">
-              <Button variant="outline" className="bg-blue-800 text-white border-blue-700 hover:bg-blue-700">
+              <Button variant="outline" className="bg-blue-800 text-white border-blue-700 hover:bg-blue-700 cursor-pointer">
                 <Truck className="h-4 w-4 mr-2" />
                 Dla Gastronomii
               </Button>
-              <Button variant="outline" className="bg-blue-800 text-white border-blue-700 hover:bg-blue-700">
+              <Button variant="outline" className="bg-blue-800 text-white border-blue-700 hover:bg-blue-700 cursor-pointer">
                 <Building className="h-4 w-4 mr-2" />
                 Dla Biura
               </Button>
-              <Button variant="outline" className="bg-blue-800 text-white border-blue-700 hover:bg-blue-700">
+              <Button variant="outline" className="bg-blue-800 text-white border-blue-700 hover:bg-blue-700 cursor-pointer">
                 <Store className="h-4 w-4 mr-2" />
                 Dla Handlu
               </Button>
-              <Button variant="outline" className="bg-blue-800 text-white border-blue-700 hover:bg-blue-700">
+              <Button variant="outline" className="cursor-pointer bg-blue-800 text-white border-blue-700 hover:bg-blue-700">
                 <Info className="h-4 w-4 mr-2" />O nas
               </Button>
             </div>
@@ -178,7 +178,7 @@ export default function Makro() {
                               -1
                             )
                           }
-                          className="flex-1"
+                          className="flex-1 cursor-pointer"
                           disabled={remainingQuantity <= 0 || currentPrice > balance || !timerActive}
                         >
                           Buy
@@ -189,7 +189,7 @@ export default function Makro() {
                           handleOrder(product.id, product.name, orderedItems, setOrderedItems)
                         }
                         variant="secondary"
-                        className="flex-1"
+                        className="flex-1 cursor-pointer"
                       >
                         Order {orderedItems[product.id] ? `(${orderedItems[product.id]})` : ""}
                       </Button>

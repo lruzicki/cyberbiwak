@@ -11,7 +11,7 @@ export const AllegroRedirectMessage: React.FC = () => {
         JEDNORAZOWA OFERTA - KUP TERAZ W SUPER NISKICH CENACH NA <strong>Allegro</strong>!
       </p>
       <Link href="/alegro" target="_blank">
-        <Button className="mt-6 px-6 py-3 text-lg bg-blue-500 hover:bg-blue-600 text-white">
+        <Button className="cursor-pointer mt-6 px-6 py-3 text-lg bg-blue-500 hover:bg-blue-600 text-white">
           Go to Allegro
         </Button>
       </Link>

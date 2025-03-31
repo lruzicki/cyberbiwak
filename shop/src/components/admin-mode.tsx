@@ -106,7 +106,7 @@ export const AdminMode: React.FC<AdminModeProps> = ({
                 description: "The timer has been started.",
               })
             }}
-            className="bg-green-600 hover:bg-green-700"
+            className="bg-green-600 hover:bg-green-700 cursor-pointer"
           >
             <Play className="h-4 w-4 mr-2" /> Start
           </Button>
@@ -118,7 +118,7 @@ export const AdminMode: React.FC<AdminModeProps> = ({
                 description: "The timer has been paused.",
               })
             }}
-            className="bg-amber-500 hover:bg-amber-600"
+            className="bg-amber-500 hover:bg-amber-600 cursor-pointer"
           >
             <Pause className="h-4 w-4 mr-2" /> Pause
           </Button>
@@ -127,6 +127,7 @@ export const AdminMode: React.FC<AdminModeProps> = ({
         {/* Clear Local Storage Button */}
         <Button
           variant="destructive"
+          className="cursor-pointer"
           onClick={() => {
             if (confirm("Are you sure you want to clear all data? This action cannot be undone.")) {
               setTimerActive(false)
@@ -153,7 +154,7 @@ export const AdminMode: React.FC<AdminModeProps> = ({
             setIsAdminMode(false)
             toast.info("Admin Mode Disabled")
           }}
-          className="ml-auto"
+          className="ml-auto cursor-pointer"
         >
           Exit Admin Mode
         </Button>
