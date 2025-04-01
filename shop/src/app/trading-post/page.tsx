@@ -46,21 +46,6 @@ export default function TradingPost() {
     setRounds(roundData)
   }, [])
 
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case "wood":
-        return <Tree className="h-4 w-4" />
-      case "ground":
-        return <Map className="h-4 w-4" />
-      case "food":
-        return <Wheat className="h-4 w-4" />
-      case "tools":
-        return <Axe className="h-4 w-4" />
-      default:
-        return null
-    }
-  }
-
   const getPriceHistory = (itemId: string) => {
     // Mock price history for demonstration purposes
     return Array.from({ length: currentRound }, (_, i) => getCurrentPrice(itemId, i + 1))
@@ -146,13 +131,14 @@ export default function TradingPost() {
     return (
       <div className="flex gap-8 h-20 px-30">
         {/* Price Graph */}
-        <div className="w-32 h-20 group transition-all duration-100 hover:z-40 hover:-translate-x-39 hover:-translate-y-22 px-20">
+        <div className="w-32 h-20 group transition-all duration-100 hover:z-40 px-20">
           <div className="z-40 group-hover:w-100 group-hover:h-75 w-32 h-20 transition-all duration-100 bg-white rounded-md shadow-md p-2">
             <Line data={priceData} options={options} />
           </div>
         </div>
+
         {/* Quantity Graph */}
-        <div className="w-32 h-20 group transition-all duration-100 hover:z-40 hover:-translate-x-39 hover:-translate-y-22 px-20">
+        <div className="w-32 h-20 group transition-all duration-100 hover:z-40 px-20">
           <div className="z-40 group-hover:w-100 group-hover:h-75 w-32 h-20 transition-all duration-100 bg-white rounded-md shadow-md p-2">
             <Line data={quantityData} options={options} />
           </div>
@@ -160,6 +146,60 @@ export default function TradingPost() {
       </div>
     );
   };
+
+  const renderItemList = (items: typeof allItems) => (
+    <div>
+      {/* Headers for Price and Quantity */}
+      <div className="flex justify-between items-center mb-4 justify-end px-30">
+        <div className="flex gap-8">
+          <h4 className="text-sm font-bold text-center">Price</h4>
+          <h4 className="text-sm font-bold text-center px-30">Quantity</h4>
+        </div>
+      </div>
+
+      {/* List of Items */}
+      <ul className="divide-y divide-gray-200">
+        {items.map((item) => {
+          const currentPrice = getCurrentPrice(item.id, currentRound);
+          const remainingQuantity = getRemainingQuantity(item.id, currentRound, purchasedInRound);
+
+          return (
+            <li key={item.id} className="flex justify-between items-center py-4">
+              {/* Image and Details */}
+              <div className="flex items-center gap-4">
+                <Image
+                  src={item.image || "/placeholder.svg"}
+                  alt={item.name}
+                  width={50}
+                  height={50}
+                  className="rounded-md object-cover"
+                />
+                <div>
+                  <h3 className="text-lg font-medium">{item.name}</h3>
+                  <p className="text-sm text-gray-500">Price: {currentPrice} PLN</p>
+                  <p className="text-sm">
+                    Base stock:{" "}
+                    {(() => {
+                      const currentRoundData = roundData.find((r) => r.number === currentRound);
+                      if (!currentRoundData) return 0;
+                      return currentRoundData.maxPurchases[item.id] || 0;
+                    })()}{" "}
+                    units
+                  </p>
+                </div>
+              </div>
+
+              {/* Graphs */}
+              <div className="flex items-center gap-4">
+                {renderGraphs(item.id)}
+                <p className="text-sm">In inventory: {getInventoryCount(item.id, inventory)}</p>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
 
   if (!isLoaded) {
     return <div>Loading...</div>
@@ -180,99 +220,34 @@ export default function TradingPost() {
       <div className="container mx-auto py-8 px-4">
         <Tabs defaultValue="all" className="w-full">
           <TabsList className="grid grid-cols-5 mb-8">
-            <TabsTrigger value="all" className="flex items-center gap-2">
+            <TabsTrigger value="all" className="flex items-center gap-2 cursor-pointer">
               All
             </TabsTrigger>
-            <TabsTrigger value="wood" className="flex items-center gap-2">
+            <TabsTrigger value="wood" className="flex items-center gap-2 cursor-pointer">
               <Tree className="h-4 w-4" /> Wood
             </TabsTrigger>
-            <TabsTrigger value="ground" className="flex items-center gap-2">
+            <TabsTrigger value="ground" className="flex items-center gap-2 cursor-pointer">
               <Map className="h-4 w-4" /> Ground
             </TabsTrigger>
-            <TabsTrigger value="food" className="flex items-center gap-2">
+            <TabsTrigger value="food" className="flex items-center gap-2 cursor-pointer">
               <Wheat className="h-4 w-4" /> Food
             </TabsTrigger>
-            <TabsTrigger value="tools" className="flex items-center gap-2">
+            <TabsTrigger value="tools" className="flex items-center gap-2 cursor-pointer">
               <Axe className="h-4 w-4" /> Tools
             </TabsTrigger>
           </TabsList>
-          <TabsContent value="all" className="mt-0">
-            <ul className="divide-y divide-gray-200">
-              {allItems.map((item) => {
-                const currentPrice = getCurrentPrice(item.id, currentRound)
 
-                return (
-                  <li key={item.id} className="flex justify-between items-center py-4">
-                    <div className="flex items-center gap-4">
-                      <Image
-                        src={item.image || "/placeholder.svg"}
-                        alt={item.name}
-                        width={50}
-                        height={50}
-                        className="rounded-md object-cover"
-                      />
-                      <div>
-                        <h3 className="text-lg font-medium">{item.name}</h3>
-                        <p className="text-sm text-gray-500">Price: {currentPrice} PLN</p>
-                        <p className="text-sm">
-                        Base stock:{" "}
-                        {(() => {
-                          const currentRoundData = roundData.find((r) => r.number === currentRound);
-                          if (!currentRoundData) return 0;
-                          return currentRoundData.maxPurchases[item.id] || 0;
-                        })()} units
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      {renderGraphs(item.id)}
-                      <p className="text-sm">In inventory: {getInventoryCount(item.id, inventory)}</p>
-                    </div>
-                  </li>
-                )
-              })}
-            </ul>
+          {/* All Items */}
+          <TabsContent value="all" className="mt-0">
+            <h2 className="text-xl font-bold mb-4">All Items</h2>
+            {renderItemList(allItems)}
           </TabsContent>
 
+          {/* Category-Specific Items */}
           {Object.entries(categories).map(([category, items]) => (
             <TabsContent key={category} value={category} className="mt-0">
-              <ul className="divide-y divide-gray-200">
-                {items.map((item) => {
-                  const currentPrice = getCurrentPrice(item.id, currentRound)
-
-                  return (
-                    <li key={item.id} className="flex justify-between items-center py-4">
-                      <div className="flex items-center gap-4">
-                        <Image
-                          src={item.image || "/placeholder.svg"}
-                          alt={item.name}
-                          width={50}
-                          height={50}
-                          className="rounded-md object-cover"
-                        />
-                        <div>
-                          <h3 className="text-lg font-medium">{item.name}</h3>
-                          <p className="text-sm text-gray-500">Price: {currentPrice} PLN</p>
-                          <p className="text-sm">
-                            Base stock:{" "}
-                            {(() => {
-                          const currentRoundData = roundData.find((r) => r.number === currentRound);
-                          if (!currentRoundData) return 0;
-                          return currentRoundData.maxPurchases[item.id] || 0;
-                        })()} units
-                        </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-4">
-                        {renderGraphs(item.id)}
-                      </div>
-                      <div className="flex items-center gap-4">
-                        <p className="text-sm">In inventory: {getInventoryCount(item.id, inventory)}</p>
-                      </div>
-                    </li>
-                  )
-                })}
-              </ul>
+              <h2 className="text-xl font-bold mb-4">{category.charAt(0).toUpperCase() + category.slice(1)} Items</h2>
+              {renderItemList(items)}
             </TabsContent>
           ))}
         </Tabs>

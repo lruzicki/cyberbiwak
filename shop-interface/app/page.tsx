@@ -832,16 +832,16 @@ export default function Shop() {
 
         <Tabs defaultValue="wood" className="w-full">
           <TabsList className="grid grid-cols-4 mb-8">
-            <TabsTrigger value="wood" className="flex items-center gap-2">
+            <TabsTrigger value="wood" className="flex items-center gap-2 cursor-pointer">
               <Tree className="h-4 w-4" /> Wood
             </TabsTrigger>
-            <TabsTrigger value="ground" className="flex items-center gap-2">
+            <TabsTrigger value="ground" className="flex items-center gap-2 cursor-pointer">
               <Map className="h-4 w-4" /> Ground
             </TabsTrigger>
-            <TabsTrigger value="food" className="flex items-center gap-2">
+            <TabsTrigger value="food" className="flex items-center gap-2 cursor-pointer">
               <Wheat className="h-4 w-4" /> Food
             </TabsTrigger>
-            <TabsTrigger value="tools" className="flex items-center gap-2">
+            <TabsTrigger value="tools" className="flex items-center gap-2 cursor-pointer">
               <Axe className="h-4 w-4" /> Tools
             </TabsTrigger>
           </TabsList>
