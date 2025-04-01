@@ -1,35 +1,31 @@
 "use client"
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Axe, Wheat, TreesIcon as Tree, Map } from "lucide-react"
 import Image from "next/image"
 import { useLocalStorage } from "@/hooks/use-local-storage"
 import { useEffect, useState } from "react"
-import { toast } from "sonner"
 import { categories } from "@/products/products"
 import { roundData, Round } from "@/products/round-data"
 import { MainNavBar } from "@/components/main-nav-bar"
-import { handleBuy, handleOrder } from "@/utils/shop-actions"
 import { useTimer } from "@/utils/use-timer"
 import { getCurrentPrice, getRemainingQuantity, getInventoryCount } from "@/utils/products-actions" // Import the reusable functions
+import { Line } from "react-chartjs-2"
+import {
+  Chart as ChartJS,
+  LineElement,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+} from "chart.js"
+import zoomPlugin from "chartjs-plugin-zoom"
+
+ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement, zoomPlugin)
 
 export default function TradingPost() {
   const [balance, setBalance] = useLocalStorage("shop-balance", 10000)
   const [inventory, setInventory] = useLocalStorage<Record<string, number>>("shop-inventory", { "buk": 3 })
   const [orderedItems, setOrderedItems] = useLocalStorage<Record<string, number>>("shop-ordered-items", {})
-  const [purchaseHistory, setPurchaseHistory] = useLocalStorage<Array<{
-    id: number
-    itemId: string
-    itemName: string
-    price: number
-    quantity: number
-    date: string
-    category: string
-    round: number
-  }>>("shop-purchase-history", [])
   const [timerActive, setTimerActive] = useLocalStorage("shop-timer-active", false)
   const [targetTime, setTargetTime] = useLocalStorage("shop-target-time", Date.now() + 70 * 60 * 1000)
   const [rounds, setRounds] = useState<Round[]>([])
@@ -65,6 +61,106 @@ export default function TradingPost() {
     }
   }
 
+  const getPriceHistory = (itemId: string) => {
+    // Mock price history for demonstration purposes
+    return Array.from({ length: currentRound }, (_, i) => getCurrentPrice(itemId, i + 1))
+  }
+
+  const renderGraphs = (itemId: string) => {
+    const priceHistory = getPriceHistory(itemId);
+    const quantityHistory = Array.from({ length: currentRound }, (_, i) =>
+      getRemainingQuantity(itemId, i + 1, purchasedInRound)
+    );
+
+    const priceData = {
+      labels: priceHistory.map((_, index) => `${index + 1}`),
+      datasets: [
+        {
+          label: "Price",
+          data: priceHistory,
+          borderColor: "rgba(75, 192, 192, 1)",
+          backgroundColor: "rgba(75, 192, 192, 0.2)",
+          borderWidth: 2,
+          pointRadius: 0,
+        },
+      ],
+    };
+
+    const quantityData = {
+      labels: quantityHistory.map((_, index) => `${index + 1}`),
+      datasets: [
+        {
+          label: "Quantity",
+          data: quantityHistory,
+          borderColor: "rgba(192, 75, 75, 1)",
+          backgroundColor: "rgba(192, 75, 75, 0.2)",
+          borderWidth: 2,
+          pointRadius: 0,
+        },
+      ],
+    };
+
+    const options = {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        x: {
+          ticks: {
+            display: true, // Show x-axis ticks (rounds)
+          },
+          grid: {
+            drawTicks: true, // Draw gridlines for x-axis
+          },
+        },
+        y: {
+          ticks: {
+            display: true, // Show y-axis ticks (values)
+          },
+          grid: {
+            drawTicks: true, // Draw gridlines for y-axis
+          },
+        },
+      },
+      plugins: {
+        legend: {
+          display: false, // Hide legend
+        },
+        zoom: {
+          pan: {
+            enabled: true,
+            mode: "x" as const, // Allow panning on the x-axis
+          },
+          zoom: {
+            wheel: {
+              enabled: true, // Enable zooming with the mouse wheel
+            },
+            pinch: {
+              enabled: true, // Enable zooming with pinch gestures
+            },
+            mode: "x" as const, // Allow zooming on the x-axis
+          },
+        },
+      },
+    };
+
+    return (
+      <div className="flex gap-8 h-20 px-30">
+        {/* Price Graph */}
+        <div className="w-32 h-20 group transition-all duration-100 hover:z-40 hover:-translate-x-39 hover:-translate-y-22 px-20">
+          <div className="z-40 group-hover:w-100 group-hover:h-75 w-32 h-20 transition-all duration-100 bg-white rounded-md shadow-md p-2">
+            <Line data={priceData} options={options} />
+          </div>
+        </div>
+        {/* Quantity Graph */}
+        <div className="w-32 h-20 group transition-all duration-100 hover:z-40 hover:-translate-x-39 hover:-translate-y-22 px-20">
+          <div className="z-40 group-hover:w-100 group-hover:h-75 w-32 h-20 transition-all duration-100 bg-white rounded-md shadow-md p-2">
+            <Line data={quantityData} options={options} />
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   if (!isLoaded) {
     return <div>Loading...</div>
   }
@@ -82,8 +178,11 @@ export default function TradingPost() {
       />
 
       <div className="container mx-auto py-8 px-4">
-        <Tabs defaultValue="wood" className="w-full">
-          <TabsList className="grid grid-cols-4 mb-8">
+        <Tabs defaultValue="all" className="w-full">
+          <TabsList className="grid grid-cols-5 mb-8">
+            <TabsTrigger value="all" className="flex items-center gap-2">
+              All
+            </TabsTrigger>
             <TabsTrigger value="wood" className="flex items-center gap-2">
               <Tree className="h-4 w-4" /> Wood
             </TabsTrigger>
@@ -97,106 +196,83 @@ export default function TradingPost() {
               <Axe className="h-4 w-4" /> Tools
             </TabsTrigger>
           </TabsList>
+          <TabsContent value="all" className="mt-0">
+            <ul className="divide-y divide-gray-200">
+              {allItems.map((item) => {
+                const currentPrice = getCurrentPrice(item.id, currentRound)
+
+                return (
+                  <li key={item.id} className="flex justify-between items-center py-4">
+                    <div className="flex items-center gap-4">
+                      <Image
+                        src={item.image || "/placeholder.svg"}
+                        alt={item.name}
+                        width={50}
+                        height={50}
+                        className="rounded-md object-cover"
+                      />
+                      <div>
+                        <h3 className="text-lg font-medium">{item.name}</h3>
+                        <p className="text-sm text-gray-500">Price: {currentPrice} PLN</p>
+                        <p className="text-sm">
+                        Base stock:{" "}
+                        {(() => {
+                          const currentRoundData = roundData.find((r) => r.number === currentRound);
+                          if (!currentRoundData) return 0;
+                          return currentRoundData.maxPurchases[item.id] || 0;
+                        })()} units
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      {renderGraphs(item.id)}
+                      <p className="text-sm">In inventory: {getInventoryCount(item.id, inventory)}</p>
+                    </div>
+                  </li>
+                )
+              })}
+            </ul>
+          </TabsContent>
 
           {Object.entries(categories).map(([category, items]) => (
             <TabsContent key={category} value={category} className="mt-0">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <ul className="divide-y divide-gray-200">
                 {items.map((item) => {
                   const currentPrice = getCurrentPrice(item.id, currentRound)
-                  const remainingQuantity = getRemainingQuantity(item.id, currentRound, purchasedInRound)
-                  if (category === "food" || category === "ground") {
-                    const seed = currentRound + item.id.charCodeAt(0) + item.id.charCodeAt(item.id.length - 1) + item.id.length;
-                    const randomFromSeed = Math.abs(Math.sin(seed)) % 1;
-                    const shouldDisplay = randomFromSeed > 0.5;
-                    if (!shouldDisplay) {
-                      return null;
-                    }
-                  }
-                  if (remainingQuantity === 0) {
-                    return null
-                    }
 
                   return (
-                    <Card key={item.id} className="overflow-hidden">
-                      <CardHeader className="p-4 pb-2">
-                        <CardTitle className="text-lg flex items-center gap-2">
-                          {getCategoryIcon(category)} {item.name}
-                        </CardTitle>
-                        <CardDescription>Price: {currentPrice} PLN</CardDescription>
-                      </CardHeader>
-                      <CardContent className="p-4 pt-0 pb-2">
-                        <div className="flex justify-center">
-                          <Image
-                            src={item.image || "/placeholder.svg"}
-                            alt={item.name}
-                            width={100}
-                            height={100}
-                            className="rounded-md object-cover"
-                          />
+                    <li key={item.id} className="flex justify-between items-center py-4">
+                      <div className="flex items-center gap-4">
+                        <Image
+                          src={item.image || "/placeholder.svg"}
+                          alt={item.name}
+                          width={50}
+                          height={50}
+                          className="rounded-md object-cover"
+                        />
+                        <div>
+                          <h3 className="text-lg font-medium">{item.name}</h3>
+                          <p className="text-sm text-gray-500">Price: {currentPrice} PLN</p>
+                          <p className="text-sm">
+                            Base stock:{" "}
+                            {(() => {
+                          const currentRoundData = roundData.find((r) => r.number === currentRound);
+                          if (!currentRoundData) return 0;
+                          return currentRoundData.maxPurchases[item.id] || 0;
+                        })()} units
+                        </p>
                         </div>
-                        {timerActive && (
-                          <div className="mt-2 text-sm">
-                            <div className="flex justify-between">
-                              <span>Available in round {currentRound}:</span>
-                              <span className={remainingQuantity === 0 ? "text-red-500 font-bold" : ""}>
-                                {remainingQuantity} units
-                              </span>
-                            </div>
-                          </div>
-                        )}
-                      </CardContent>
-                      <CardFooter className="p-4 flex flex-col gap-2">
-                        <div className="flex justify-between items-center w-full">
-                          <span>In inventory: {getInventoryCount(item.id, inventory)}</span>
-                        </div>
-                        <div className="flex gap-2 w-full">
-                          {currentRound === 1 && (
-                            <Button
-                              onClick={() =>
-                                handleBuy(
-                                  item.id,
-                                  item.name,
-                                  currentPrice,
-                                  category,
-                                  currentRound,
-                                  balance,
-                                  setBalance,
-                                  inventory,
-                                  setInventory,
-                                  purchasedInRound,
-                                  setPurchasedInRound,
-                                  purchaseHistory,
-                                  setPurchaseHistory,
-                                  getRemainingQuantity(item.id, currentRound, purchasedInRound),
-                                  -1
-                                )
-                              }
-                              className="flex-1 cursor-pointer"
-                              disabled={remainingQuantity <= 0 || currentPrice > balance || !timerActive}
-                            >
-                              Buy
-                            </Button>
-                          )}
-                          <Button
-                            onClick={() =>
-                              handleOrder(
-                                item.id,
-                                item.name,
-                                orderedItems,
-                                setOrderedItems
-                              )
-                            }
-                            variant="secondary"
-                            className="flex-1 cursor-pointer"
-                          >
-                            Order {orderedItems[item.id] ? `(${orderedItems[item.id]})` : ""}
-                          </Button>
-                        </div>
-                      </CardFooter>
-                    </Card>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        {renderGraphs(item.id)}
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <p className="text-sm">In inventory: {getInventoryCount(item.id, inventory)}</p>
+                      </div>
+                    </li>
                   )
                 })}
-              </div>
+              </ul>
             </TabsContent>
           ))}
         </Tabs>

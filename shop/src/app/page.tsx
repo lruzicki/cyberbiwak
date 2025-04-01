@@ -223,6 +223,8 @@ export default function Shop() {
         currentRound={currentRound}
         savedCodes={savedCodes}
         setSavedCodes={setSavedCodes}
+        balance={balance}
+        setBalance={setBalance}
       />
     </div>
   )

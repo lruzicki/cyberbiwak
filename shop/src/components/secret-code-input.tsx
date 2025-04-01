@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
 import { categories } from "@/products/products"
 import { useState } from "react"
+import { getCurrentPrice } from "@/utils/products-actions"
 
 interface SecretCodeInputProps {
   inventory: Record<string, number>
@@ -22,6 +23,8 @@ interface SecretCodeInputProps {
   currentRound: number
   savedCodes: string[] // List of already used codes
   setSavedCodes: (codes: string[]) => void // Function to update saved codes
+  balance: number // Current balance of the user
+  setBalance: (balance: number) => void // Function to update the balance
 }
 
 export const SecretCodeInput: React.FC<SecretCodeInputProps> = ({
@@ -32,6 +35,8 @@ export const SecretCodeInput: React.FC<SecretCodeInputProps> = ({
   currentRound,
   savedCodes,
   setSavedCodes,
+  balance,
+  setBalance,
 }) => {
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -50,19 +55,28 @@ export const SecretCodeInput: React.FC<SecretCodeInputProps> = ({
       const parts = input.split(/[-\s]+/)
 
       // Convert all parts except the last one from ASCII to characters
+      const isBuy = Number.parseInt(parts[0]) % 2 === 0
+
       let resourceName = ""
-      for (let i = 0; i < parts.length - 2; i++) {
+      for (let i = 1; i < parts.length - 2; i++) {
         resourceName += String.fromCharCode(Number.parseInt(parts[i]))
       }
 
       // Convert the last part from hex to decimal
       const quantity = Number.parseInt(parts[parts.length - 2], 16)
       
-      const checker = quantity * currentRound + quantity % currentRound
+      const checker = quantity * currentRound
 
-      if (Number.parseInt(parts[parts.length - 1]) !== checker) {
+
+      if (Number.parseInt(parts[parts.length - 1]) !== checker + Number.parseInt(parts[0])) {
+        if (checker % quantity === 0 && checker / quantity < currentRound) {
+          toast.error("Code Expired :(", {
+            description: "This code is no longer valid.",
+          })
+          return
+        }
         toast.error("Invalid Code", {
-          description: "Checksum mismatch. Please try again.",
+          description: "U think u can cheat?",
         })
         return
       }
@@ -81,7 +95,7 @@ export const SecretCodeInput: React.FC<SecretCodeInputProps> = ({
               ...inventory,
               [item.id]: (inventory[item.id] || 0) + quantity,
             })
-
+            
             // Add to purchase history
             setPurchaseHistory([
               ...purchaseHistory,
@@ -89,14 +103,16 @@ export const SecretCodeInput: React.FC<SecretCodeInputProps> = ({
                 id: Date.now(),
                 itemId: item.id,
                 itemName: item.name,
-                price: 0, // Free because it's a code
+                price: isBuy ? getCurrentPrice(item.id, currentRound) : 0,
                 quantity: quantity,
                 date: new Date().toISOString(),
                 category: item.category,
                 round: currentRound,
               },
             ])
-
+            if (isBuy) {
+              setBalance(balance - getCurrentPrice(item.id, currentRound) * quantity)
+            }
             resourceFound = true
 
             // Mark the code as used
