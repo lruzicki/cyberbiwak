@@ -33,7 +33,7 @@ export default function Makro() {
     {}
   )
   const [searchQuery, setSearchQuery] = useState("")
-  const [targetTime, setTargetTime] = useLocalStorage("shop-target-time", Date.now() + 70 * 60 * 1000)
+  const [targetTime, setTargetTime] = useLocalStorage("shop-target-time", Date.now() + 75 * 60 * 1000)
   const [timerActive, setTimerActive] = useLocalStorage("shop-timer-active", false)
 
   const { isLoaded, timeRemaining, setTimeRemaining, currentRound } = useTimer({

@@ -36,7 +36,7 @@ export default function Nieruchomosci() {
   const [propertyType, setPropertyType] = useState("Kupię")
   const [propertyCategory, setPropertyCategory] = useState("Działka")
   const [location, setLocation] = useState("Gołubie")
-  const [targetTime, setTargetTime] = useLocalStorage("shop-target-time", Date.now() + 70 * 60 * 1000)
+  const [targetTime, setTargetTime] = useLocalStorage("shop-target-time", Date.now() + 75 * 60 * 1000)
   const [timerActive, setTimerActive] = useLocalStorage("shop-timer-active", false)
 
   const { timeRemaining, setTimeRemaining, currentRound } = useTimer({

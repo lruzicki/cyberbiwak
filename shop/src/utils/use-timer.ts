@@ -14,7 +14,7 @@ interface UseTimerOptions {
 
 export const useTimer = ({ initialTargetTime, timerActive, totalRounds, onTimerEnd, updateTargetTime }: UseTimerOptions) => {
   const [isLoaded, setIsLoaded] = useState(false) // Add a loading state
-  const [targetTime, setTargetTime] = useLocalStorage("shop-target-time", Date.now() + 70 * 60 * 1000)
+  const [targetTime, setTargetTime] = useLocalStorage("shop-target-time", Date.now() + 75 * 60 * 1000)
   const [currentRound, setCurrentRound] = useLocalStorage("shop-current-round", 0)
   const [timeRemaining, setTimeRemaining] = useLocalStorage("shop-time-remaining", Math.max(0, Math.ceil((initialTargetTime - Date.now()) / 1000))) // Time left in seconds
   const [balance, setBalance] = useLocalStorage("shop-balance", 10000)
@@ -36,9 +36,12 @@ export const useTimer = ({ initialTargetTime, timerActive, totalRounds, onTimerE
   }
 
   const calculateCurrentRound = () => {
-    const totalTime = 70 * 60 // Total time in seconds (70 minutes)
-    const roundDuration = totalTime / totalRounds // Duration of each round in seconds
+    const totalTime = 75 * 60 // Total time in seconds (75 minutes)
+    const roundDuration = 10 * 60 // Duration of each round in seconds
     const elapsedTime = totalTime - timeRemaining // Time elapsed in seconds
+    if (timeRemaining <= 5 * 60) {
+      return 8 // If time is up, return the last round
+    }
     return Math.min(totalRounds, Math.max(Math.ceil(elapsedTime / roundDuration), 0)) // Calculate the current round
   }
 
@@ -133,7 +136,9 @@ export const useTimer = ({ initialTargetTime, timerActive, totalRounds, onTimerE
 
       downloadData()
       setTimeout(() => {
-        window.location.href = "/"
+        if (window.location.pathname !== "/") {
+          window.location.href = "/"
+        }
       }, 3000)
     } else if (!timerActive) {
       interval = setInterval(() => {

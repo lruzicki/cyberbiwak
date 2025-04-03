@@ -35,7 +35,7 @@ export default function Allegro() {
   )
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState<string>("all") // Track selected category
-  const [targetTime, setTargetTime] = useLocalStorage("shop-target-time", Date.now() + 70 * 60 * 1000)
+  const [targetTime, setTargetTime] = useLocalStorage("shop-target-time", Date.now() +75 * 60 * 1000)
   const [timerActive, setTimerActive] = useLocalStorage("shop-timer-active", false)
 
   const { timeRemaining, currentRound } = useTimer({

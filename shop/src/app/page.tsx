@@ -16,7 +16,7 @@ import { categories } from "@/products/products"
 export default function Shop() {
   const [balance, setBalance] = useLocalStorage("shop-balance", 10000)
   const [timerActive, setTimerActive] = useLocalStorage("shop-timer-active", false)
-  const [targetTime, setTargetTime] = useLocalStorage("shop-target-time", Date.now() + 70 * 60 * 1000)
+  const [targetTime, setTargetTime] = useLocalStorage("shop-target-time", Date.now() + 75 * 60 * 1000)
   const [inventory, setInventory] = useLocalStorage<Record<string, number>>("shop-inventory", { "buk": 3 })
   const [orderedItems, setOrderedItems] = useLocalStorage<Record<string, number>>("shop-ordered-items", {})
   const [purchaseHistory, setPurchaseHistory] = useLocalStorage<
@@ -48,7 +48,7 @@ export default function Shop() {
     return `${minutes.toString().padStart(2, "0")}:${remainingSeconds.toString().padStart(2, "0")}`
   }
 
-  const timerProgress = ((70 * 60 - timeRemaining) / (70 * 60)) * 100
+  const timerProgress = ((75 * 60 - timeRemaining) / (75 * 60)) * 100
 
   const handleAdminConfirm = (password: string) => {
     if (password === "n1gg4") {
@@ -106,7 +106,7 @@ export default function Shop() {
               <span>Game Timer</span>
               <div className="text-2xl font-mono">{formatTime(timeRemaining)}</div>
             </CardTitle>
-            <CardDescription>Current Round: {currentRound} of 7</CardDescription>
+            <CardDescription>Current Round: {currentRound} of 8</CardDescription>
           </CardHeader>
           <CardContent className="pb-2">
             <Progress value={timerProgress} className="h-2 mb-4" />
@@ -215,17 +215,19 @@ export default function Shop() {
         onConfirm={handleAdminConfirm}
       />
 
-      <SecretCodeInput
-        inventory={inventory}
-        setInventory={setInventory}
-        purchaseHistory={purchaseHistory}
-        setPurchaseHistory={setPurchaseHistory}
-        currentRound={currentRound}
-        savedCodes={savedCodes}
-        setSavedCodes={setSavedCodes}
-        balance={balance}
-        setBalance={setBalance}
-      />
+      {timeRemaining > 0 && (
+        <SecretCodeInput
+          inventory={inventory}
+          setInventory={setInventory}
+          purchaseHistory={purchaseHistory}
+          setPurchaseHistory={setPurchaseHistory}
+          currentRound={currentRound}
+          savedCodes={savedCodes}
+          setSavedCodes={setSavedCodes}
+          balance={balance}
+          setBalance={setBalance}
+        />
+      )}
     </div>
   )
 }

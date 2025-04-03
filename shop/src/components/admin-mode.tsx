@@ -140,10 +140,10 @@ export const AdminMode: React.FC<AdminModeProps> = ({
               setInventory({ "buk": 3 }) // Reset inventory
               setOrderedItems({}) // Reset cart
               setPurchaseHistory([]) // Reset purchase history
-              setTimeRemaining(70 * 60) // Reset timer
+              setTimeRemaining(75 * 60) // Reset timer
               setCurrentRound(0) // Reset round
               setPurchasedInRound({}) // Reset purchased items
-              setTargetTime(Date.now() + 70 * 60 * 1000) // Reset target time
+              setTargetTime(Date.now() + 75 * 60 * 1000) // Reset target time
               setSavedCodes([]) // Reset saved codes
               toast.success("All data has been cleared.")
             }

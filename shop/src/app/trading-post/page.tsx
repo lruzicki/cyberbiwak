@@ -27,7 +27,7 @@ export default function TradingPost() {
   const [inventory, setInventory] = useLocalStorage<Record<string, number>>("shop-inventory", { "buk": 3 })
   const [orderedItems, setOrderedItems] = useLocalStorage<Record<string, number>>("shop-ordered-items", {})
   const [timerActive, setTimerActive] = useLocalStorage("shop-timer-active", false)
-  const [targetTime, setTargetTime] = useLocalStorage("shop-target-time", Date.now() + 70 * 60 * 1000)
+  const [targetTime, setTargetTime] = useLocalStorage("shop-target-time", Date.now() +75 * 60 * 1000)
   const [rounds, setRounds] = useState<Round[]>([])
   const [purchasedInRound, setPurchasedInRound] = useLocalStorage<Record<number, Record<string, number>>>("purchased-in-round", {})
   const [showAdminModal, setShowAdminModal] = useState(false)
