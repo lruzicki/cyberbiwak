@@ -28,9 +28,21 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ## 3. Bonusowy Kod
 - Struktura kodu (oddzielone `spacjami` lub `-`):
-    - Nazwa zasobu zamieniona na ASCII 
-    - Ilość w hex
-    - (ilość * runda) + (ilość % runda) w dziesiętnym
+    - **Pierwsza część**: Liczba decyzyjna (parzysta = kupno, nieparzysta = darmowy zasób).
+    - **Kolejne części**: Nazwa zasobu zamieniona na ASCII (każda litera jako liczba ASCII).
+    - **Przedostatnia część**: Ilość zasobu w systemie szesnastkowym (hex).
+    - **Ostatnia część**: Wartość kontrolna w systemie dziesiętnym:
+        - `(ilość * runda) + pierwsza część`.
+
+### Przykład:
+- Kod: `3 115 111 115 110 97 A 43`
+    - **Pierwsza część**: `3` (kupno).
+    - **Kolejne części**: `115 111 115 110 97` → `sosna` (nazwa zasobu).
+    - **Przedostatnia część**: `A` → `10` (ilość, z hex do dziesiętnego).
+    - **Ostatnia część**: `43` → `(10 * 4) + 3` (ilość * runda + pierwsza część).
+    - Jeśli kod jest poprawny, dodaje `10` sztuk zasobu `sosna` do ekwipunku.
+    - Jeśli kod jest nieprawidłowy, wyświetla komunikat o błędzie.
+    - Jeśli kod wygasł, wyświetla komunikat: "Code Expired :(".
 
 ## 4. Reklamy i Promocje
 - Wyświetlanie dynamicznych reklam, takich jak:
