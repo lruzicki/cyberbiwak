@@ -27,16 +27,22 @@ export function MainNavBar({ balance, orderedItemsCount, currentRound, timeRemai
   useEffect(() => {
     setIsClient(true)
     if (!timerActive) return // Don't show ads if the timer is not active
-    if ((timeRemaining <= 55 * 60 && timeRemaining > 55 * 60 - 3)
+    if ((timeRemaining <= 53 * 60 && timeRemaining > 53 * 60 - 3)
+      || (timeRemaining <= 67 * 60 && timeRemaining > 67 * 60 - 3)
+      || (timeRemaining <= 39 * 60 && timeRemaining > 39 * 60 - 3)
       || (timeRemaining <= 28 * 60 && timeRemaining > 28 * 60 - 3)
+      || (timeRemaining <= 11 * 60 && timeRemaining > 11 * 60 - 3)
+      || (timeRemaining <= 8 * 60 && timeRemaining > 8 * 60 - 3)
       ) {
       setShowLuckyAd(true)
     }
     // Show AllegroRedirectMessage at a specific time
-    if (timeRemaining <= 45 * 60 && timeRemaining > 45 * 60 - 3
+    if (timeRemaining <= 48 * 60 && timeRemaining > 48 * 60 - 3
+      || timeRemaining <= 57 * 60 && timeRemaining > 57 * 60 - 3
+      || timeRemaining <= 69 * 60 && timeRemaining > 69 * 60 - 3
       || timeRemaining <= 37 * 60 && timeRemaining > 37 * 60 - 3
       || timeRemaining <= 22 * 60 && timeRemaining > 22 * 60 - 3
-      || timeRemaining <= 15 * 60 && timeRemaining > 15 * 60
+      || timeRemaining <= 13 * 60 && timeRemaining > 13 * 60
       || timeRemaining <= 7 * 60 && timeRemaining > 7 * 60
       || timeRemaining <= 2 * 60 && timeRemaining > 2 * 60
     ) {
